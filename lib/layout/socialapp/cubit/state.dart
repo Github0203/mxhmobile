@@ -124,17 +124,33 @@ class GetCommentSuccessState extends SocialStates {}
 
 class GetCommentsErrorState extends SocialStates {}
 
+class GetCommentSubLoadingState extends SocialStates {}
+
+class GetCommentSubSuccessState extends SocialStates {}
+
+class GetCommentsSubErrorState extends SocialStates {}
+
 class UploadCommentPicLoadingState extends SocialStates {}
 
 class UploadCommentPicSuccessState extends SocialStates {}
 
 class UploadCommentPicErrorState extends SocialStates {}
 
+class UploadCommentPicSubLoadingState extends SocialStates {}
+
+class UploadCommentPicSubSuccessState extends SocialStates {}
+
+class UploadCommentPicSubErrorState extends SocialStates {}
+
 class UpdatePostLoadingState extends SocialStates {}
 
 class GetCommentPicSuccessState extends SocialStates {}
 
 class GetCommentPicErrorState extends SocialStates {}
+
+class GetCommentPicSubSuccessState extends SocialStates {}
+
+class GetCommentPicSubErrorState extends SocialStates {}
 
 class SocialSendMessageSuccessState extends SocialStates {}
 

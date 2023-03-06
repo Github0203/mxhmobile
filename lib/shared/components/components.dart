@@ -75,6 +75,27 @@ PreferredSizeWidget  defaultAppBar({
   actions: actions,
 );
 
+PreferredSizeWidget  defaultAppBarNoPop({
+  required BuildContext context,
+  String ? title,
+   List<Widget> ? actions,
+}) => AppBar(
+  leading: IconButton(
+    onPressed: ()
+    {
+      Navigator.of(context).pop();
+      
+    }, icon:  Icon(
+    IconBroken.Arrow___Left_2,
+  ),
+  ),
+  titleSpacing: 5.0,
+  title: Text(
+    title!,
+  ),
+  actions: actions,
+);
+
 
 
 

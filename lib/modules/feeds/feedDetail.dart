@@ -11,159 +11,199 @@ import '../../../models/social_model/post_model.dart';
 import '../../../models/social_model/social_user_model.dart';
 import '../../../shared/components/components.dart';
 import '../../../shared/styles/iconbroken.dart';
-import '../CommentsScreen.dart';
+import '../CommentsScreenSub.dart';
 import '../new_post/new_post.dart';
 import 'package:multi_image_layout/multi_image_layout.dart';
 import 'dart:io';
 import 'package:socialapp/modules/addMedias/addMedias.dart';
 import 'package:socialapp/layout/gallery/gallery_view.dart';
-import 'package:socialapp/modules/feeds/feedDetail.dart';
 import 'package:flutter/cupertino.dart';
 
-
-
-class Feeds extends StatelessWidget {
+// ignore: must_be_immutable
+class feedDetail extends StatelessWidget {
+  final String? userName;
+  String? idPost;
+  String? indexImagePost;
+  String? idPostSub;
+  feedDetail(this.userName, this.idPost, this.indexImagePost, this.idPostSub);
 
   var scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
-    bool loadingne = false;
-    return Builder(
-      builder: (context) {
-        SocialCubit.get(context).getPosts();
+    return Scaffold(
+      appBar: defaultAppBarNoPop(
+          context: context,
+          title: 'Bài viết của ' + userName.toString(),
+          actions: []),
+      body: Builder(builder: (context) {
+        // SocialCubit.get(context).getPosts();
         SocialCubit.get(context).getMyData();
-    
+        SocialCubit.get(context).getDetailPost(idPost!);
 
         return BlocConsumer<SocialCubit, SocialStates>(
-          listener: (context, state) {
-                if (state is SocialCreatePostSuccessState){
-    showToast(text: "Đã thêm bài viết thành công", state: ToastStates.SUCCESS);
-                loadingne = true;
-                }
-                if (state is SocialCreatePostErrorState){
-    showToast(text: "Thêm bài viết thất bại", state: ToastStates.ERROR);
-                }
-          },
+          listener: (context, state) {},
           builder: (context, state) {
-            SocialUserModel? userModel = SocialCubit.get(context).socialUserModel;
+            SocialUserModel? userModel =
+                SocialCubit.get(context).socialUserModel;
             double setWidth = MediaQuery.of(context).size.width;
             double setheight = MediaQuery.of(context).size.height;
 
             return ConditionalBuilder(
-              condition: SocialCubit.get(context).posts1.isNotEmpty &&
+              condition: SocialCubit.get(context).posts2.isNotEmpty &&
                   SocialCubit.get(context).socialUserModel != null,
               builder: (context) => SingleChildScrollView(
                 physics: BouncingScrollPhysics(),
                 child: Column(
                   children: [
-                    Card(
-                      clipBehavior: Clip.antiAliasWithSaveLayer,
-                      elevation: 5,
-                      margin: EdgeInsets.all(8),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) => buildPost(
+                          SocialCubit.get(context)
+                              .posts1[int.parse(indexImagePost!)],
+                          userModel!,
+                          context,
+                          index,
+                          scaffoldKey,
+                          SocialCubit.get(context).posts1[index].subPost),
+                      separatorBuilder: (context, index) => SizedBox(
+                        height: 8,
+                      ),
+                      itemCount: 1,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+
+                      ListView.separated(
+                       separatorBuilder: (context, index1) => SizedBox(
+                        height: 8,
+                      ),
+                      itemCount: SocialCubit.get(context).posts2.length,
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index1) => 
+              Center(
+                child: 
+                Card(
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    elevation: 5,
+                    margin: EdgeInsets.zero,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 13),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Image.network(SocialCubit.get(context).posts2[index1].postImage.toString(),
+                            fit: BoxFit.fill,
+                            loadingBuilder: (BuildContext context,
+                                Widget child,
+                                ImageChunkEvent? loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress
+                                              .cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                          ),
+                          SizedBox(
                             height: 10,
                           ),
                           Row(
                             children: [
                               InkWell(
-                                onTap: () {
-                                  navigateTo(context,SocialLayout(4));
-                                },
-                                child: CircleAvatar(
-                                    radius: 22,
-                                    backgroundImage:
-                                    NetworkImage('${userModel!.image}')),
-                              ),
-
-                              TextButton(
-                                onPressed: () {
-                                  navigateTo(context, NewPostScreen());
-                                },
-                                child: SizedBox(
-                                  width: 100,
-                                  child: Text("What is in your mind ...",
-                                    style: const TextStyle(color: Colors.grey),
-                                    textAlign: TextAlign.start,
-                                  ),
+                                onTap: () {},
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      IconBroken.Heart,
+                                      color: Colors.red,
+                                      size: 20,
+                                    ),
+                                    Text(
+                                         SocialCubit.get(context).posts2[index1].likes.toString(),
+                                      style: TextStyle(fontSize: 13),
+                                    ),
+                                    Text(
+                                         ' likes',
+                                      style: TextStyle(fontSize: 13),
+                                    ),
+                                  ],
                                 ),
                               ),
+                              //if(model.comments != 0)
+                              Spacer(),
+                              InkWell(
+                                  onTap: () {
+                                    navigateTo(
+                                        context,
+                                        CommentsScreenSub(
+                                          likes: SocialCubit.get(context).posts2[index1].likes, 
+                                          postId: idPost,
+                                          postUid: SocialCubit.get(context).posts2[index1].uId,
+                                          postIdSub: SocialCubit.get(context).posts2[index1].postIdSub,
+                                          ));
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Icon(
+                                        IconBroken.Chat,
+                                        color: Colors.amber,
+                                        size: 20,
+                                      ),
+                                      Text(
+                                        SocialCubit.get(context).posts2[index1].comments.toString(),
+                                          style: TextStyle(fontSize: 10)),
+                                      Text(
+                                        " comments",
+                                        style: TextStyle(fontSize: 10),
+                                      ),
+                                    ],
+                                  )),
                             ],
                           ),
-
-                          Row(
-                            children: [
-
-                              Expanded(
-                                child: TextButton(
-                                    onPressed: () {
-
-                                       navigateTo(context, NewPostScreen());
-
-                                    },
-                                    child: Row(
-                                      children: const [
-                                        Icon(IconBroken.Image),
-                                        SizedBox(width: 5,),
-                                        Text("image/video",
-                                            ),
-                                      ],
-                                    )),
-                              ),
-                             Spacer(),
-
-                              Expanded(
-                                child: TextButton(
-                                    onPressed: () {},
-                                    child: Row(
-                                      children: const [
-                                        Icon(
-                                          Icons.tag,
-                                          color: Colors.red,
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          "#TAGS",
-                                          style: TextStyle(color: Colors.grey),
-                                        ),
-                                      ],
-                                    )),
-                              ),
-
-
-
-                            ],
-                          )
+                          SizedBox(
+                            height: 10,
+                          ),
                         ],
                       ),
                     ),
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) => buildPost(SocialCubit.get(context).posts1[index],userModel,context, index,scaffoldKey, SocialCubit.get(context).posts1[index].subPost),
-                      separatorBuilder: (context, index) => SizedBox(
-                        height: 8,
-                      ),
-                      itemCount: (SocialCubit.get(context).posts1.length),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
+                  ),
+              ),
+               ),
+            
+
+                       
+
                   ],
                 ),
               ),
-              fallback: (context) => Center(child:CircularProgressIndicator()),
+              fallback: (context) => Center(child: CircularProgressIndicator()),
             );
           },
         );
-      }
+      }),
     );
   }
 
-  Widget buildPost(PostModel model, SocialUserModel userModel ,context, index,GlobalKey<ScaffoldState> scaffoldKey, List<PostModelSub>? lengthsubpost) => Card(
+  Widget buildPost(
+          PostModel model,
+          SocialUserModel userModel,
+          context,
+          index,
+          GlobalKey<ScaffoldState> scaffoldKey,
+          List<PostModelSub>? lengthsubpost) =>
+      Card(
         clipBehavior: Clip.antiAliasWithSaveLayer,
         elevation: 5,
         margin: EdgeInsets.zero,
@@ -178,9 +218,7 @@ class Feeds extends StatelessWidget {
               Row(
                 children: [
                   InkWell(
-                    onTap: () {
-
-                    },
+                    onTap: () {},
                     child: CircleAvatar(
                         radius: 22,
                         backgroundImage: NetworkImage('${model.image}')),
@@ -192,9 +230,7 @@ class Feeds extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       InkWell(
-                          onTap: () {
-
-                          },
+                          onTap: () {},
                           child: Text(
                             '${model.name}',
                           )),
@@ -202,34 +238,32 @@ class Feeds extends StatelessWidget {
                         '${model.date} at ${model.time}',
                         style: TextStyle(color: Colors.grey),
                       ),
-
                     ],
                   ),
                   Spacer(),
-
                   PopupMenuButton(
                     itemBuilder: (context) => [
                       PopupMenuItem(
-                        
-
-                        child: TextButton(onPressed: () {  SocialCubit.get(context).deletePost(model.postId); },
+                        child: TextButton(
+                          onPressed: () {
+                            SocialCubit.get(context).deletePost(model.postId);
+                          },
                           child: Text('Delete post'),
-                      ),
+                        ),
                       ),
                       PopupMenuItem(
-
-                        child: TextButton(onPressed: () { 
-                          SocialCubit.get(context).getPosts;
-                         },
+                        child: TextButton(
+                          onPressed: () {
+                            SocialCubit.get(context).getPosts;
+                          },
                           child: Text('Edit post'),
-                      ),
+                        ),
                       ),
                     ],
                     child: Row(
                       children: const [
-
                         Text(
-                        "Tùy chọn",
+                          "Tùy chọn",
                           style: TextStyle(fontSize: 13),
                         ),
                       ],
@@ -246,82 +280,6 @@ class Feeds extends StatelessWidget {
                       ),
                     )
                   : Text('${model.text}', style: TextStyle(fontSize: 20)),
-              // if (model.subPost.postImage.toString() != null)
-                // Padding(
-                //     padding: const EdgeInsetsDirectional.only(top: 10),
-                //     child: Image(
-                //       image: NetworkImage('${model.postImage}'),
-                //     )),
-                // if (model.subPost != null)
-                Padding(
-                    padding: const EdgeInsetsDirectional.only(top: 10),
-                //     child: MultiImageViewer(
-                // images: [
-                  
-                // ],),
-                child: 
-                  StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection('posts')
-                .doc('${model.postId}')
-                .collection('subPost')
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (!snapshot.hasData) return const Text('Loading...');
-              final int surveysCount = snapshot.data!.docs.length;
-              List<DocumentSnapshot> documents = snapshot.data!.docs;
-              
-              List<String> listpostIdSubID = [];
-              documents.forEach((doc) {
-                    listpostIdSubID.add(doc['postIdSub'].toString(),);
-              });
-              
-              List<String> urls = [];
-              
-              documents.forEach((doc) {
-                    urls.add(doc['postImage'].toString(),);
-              });
-
-              print(urls.length.toString());
-              
-
-              return Center(
-                child:
-                Container(
-                  color: Colors.red,
-                   width: MediaQuery.of(context).size.width - 26,
-              height: urls.length == 1 ?
-                      300 : 
-                      urls.length == 2 ?
-                      210 :
-                      urls.length == 3 ?
-                      140 : 
-                      urls.length >= 4 ?
-                      400 : 0,
-
-                  child: 
-                  PhotoGrid(
-                            imageUrls: urls,
-                            onImageClicked: (i) => 
-                                        // onTap:() {
-              Navigator.push(
-    context, CupertinoPageRoute(
-      builder: (context) => feedDetail('${userModel.name}', '${model.postId}', i.toString(),
-                                       listpostIdSubID.toString() , 
-                                        )))
-            // },
-    ,
-                            onExpandClicked: () => print('Expand Image was clicked'),
-                            maxImages: 4,
-                          ),
-                ),
-              );
-            }),
-                
-              
-
-                ),
               Row(
                 children: [
                   Padding(
@@ -349,7 +307,6 @@ class Feeds extends StatelessWidget {
                   InkWell(
                     onTap: () {},
                     child: Row(
-
                       children: [
                         Icon(
                           IconBroken.Heart,
@@ -369,18 +326,23 @@ class Feeds extends StatelessWidget {
                       onTap: () {
                         navigateTo(
                             context,
-                            CommentsScreen(likes: model.likes, postId: model.postId,postUid: model.uId,));
+                            CommentsScreenSub(
+                              likes: model.likes,
+                              postId: model.postId,
+                              postIdSub: idPostSub,
+                              postUid: model.uId,
+                            ));
                       },
                       child: Row(
-
                         mainAxisAlignment: MainAxisAlignment.end,
-                        children:  [
+                        children: [
                           Icon(
                             IconBroken.Chat,
                             color: Colors.amber,
                             size: 20,
                           ),
-                          Text('${model.comments} ', style: TextStyle(fontSize: 10)),
+                          Text('${model.comments} ',
+                              style: TextStyle(fontSize: 10)),
                           Text(
                             "Comments",
                             style: TextStyle(fontSize: 10),
@@ -400,16 +362,20 @@ class Feeds extends StatelessWidget {
                       onTap: () {
                         navigateTo(
                           context,
-                          CommentsScreen(likes: model.likes, postId: model.postId,postUid: model.uId,),
+                          CommentsScreenSub(
+                            likes: model.likes,
+                            postId: model.postId,
+                            postIdSub: idPostSub,
+                            postUid: model.uId,
+                          ),
                         );
                       },
                       child: Row(
-
                         children: [
-
                           CircleAvatar(
                               radius: 13,
-                              backgroundImage: NetworkImage('${userModel.image}')),
+                              backgroundImage:
+                                  NetworkImage('${userModel.image}')),
                           SizedBox(
                             width: 15,
                           ),
@@ -423,14 +389,13 @@ class Feeds extends StatelessWidget {
                   ),
                   InkWell(
                     onTap: () async {
-                      SocialUserModel ? postUser = SocialCubit.get(context).socialUserModel;
+                      SocialUserModel? postUser =
+                          SocialCubit.get(context).socialUserModel;
                       await SocialCubit.get(context).likedByMe(
                           postUser: postUser,
                           context: context,
                           postModel: model,
-                          postId: model.postId
-                      );
-
+                          postId: model.postId);
                     },
                     child: Row(
                       children: const [
@@ -450,7 +415,6 @@ class Feeds extends StatelessWidget {
                     width: 15,
                   ),
                   PopupMenuButton(
-
                     onSelected: (value) {
                       if (value == 'Share') {
                         // SocialCubit.get(context).createNewPost(

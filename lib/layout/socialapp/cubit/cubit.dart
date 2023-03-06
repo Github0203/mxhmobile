@@ -430,8 +430,10 @@ class SocialCubit extends Cubit<SocialStates> {
                                 print(value);
                                 addsubPost(
                                   idDoc: value.id.toString(),
+                                  name:name,
+                                  image:image,
+                                  date: date,
                                 );
-                                getAllImageofSubCollention(value.id.toString());
                                 
                                 print('đã lưu vào firestore');
                                 paths = null;
@@ -453,9 +455,6 @@ class SocialCubit extends Cubit<SocialStates> {
     String? postText,
     String? date,
     String? postImage1,
-    String? time,
-    List? tag,
-    String? like,
     String? postIDSub,
   }){
 
@@ -480,7 +479,7 @@ paths!.forEach((i) {
                                 likes: 0,
                                 comments: 0,
                                 date: getDate(),
-                                time: time,
+                                time: DateFormat.jm().format(DateTime.now()),
                                 dateTime: FieldValue.serverTimestamp(),
                                 tags: [],
                                 // postIdSub: postIDSub,
@@ -518,7 +517,7 @@ paths!.forEach((i) {
 
 
   List<PostModelSub>? getpostsImage=[];
-  void getAllImageofSubCollention(String idPost) {
+  void getDetailPost(String idPost) {
       FirebaseFirestore.instance
         .collection('posts').doc(idPost).collection('subPost')
         .orderBy('dateTime', descending: true)
@@ -529,7 +528,7 @@ paths!.forEach((i) {
         posts2.add(PostModelSub.fromJson(element.data()));
         var likes = await element.reference.collection('likes').get();
         var comments = await element.reference.collection('comments').get();
-        await FirebaseFirestore.instance.doc(idPost).collection('subPost').doc(element.id)
+        await FirebaseFirestore.instance.collection('posts').doc(idPost).collection('subPost').doc(element.id)
             .update(({
           'likes':likes.docs.length,
           'comments':comments.docs.length,
@@ -539,8 +538,10 @@ paths!.forEach((i) {
       emit(SocialGetSubPostSuccessState());
 
     });
+
   }
 
+  
 
 
 
@@ -577,7 +578,6 @@ paths!.forEach((i) {
           'comments':comments.docs.length,
           'postId': element.id,
         }));
-        // getAllImageofSubCollention(element.id.toString());
       });
       emit(SocialGetPostsSuccessState());
     });
@@ -821,6 +821,50 @@ final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     });
   }
 
+  // uploadCommentPic sub
+  void uploadCommentPicSub({
+    required String? postId,
+    required String? postIdSub,
+    String? commentText,
+    required String? time,
+    required String? date,
+  }) {
+    isCommentImageLoading = true;
+    emit(UploadCommentPicLoadingState());
+    firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child('users/post/postIdSub${Uri.file(commentImage!.path).pathSegments.last}') 
+        .putFile(commentImage!)
+        .then((value) {
+      value.ref.getDownloadURL().then((value) {
+        commentImageURL = value;
+        commentPostSub(
+          postId: postId,
+          postIdSub: postIdSub,
+          comment: commentText,
+          commentImage: {
+            'width' : 150,
+            'image' : value,
+            'height': 200
+          },
+          time: time,
+          date: date,);
+        emit(UploadCommentPicSuccessState());
+        isCommentImageLoading = false;
+      }).catchError((error) {
+        if (kDebugMode) {
+          print('Error While getDownload CommentImageURL ' + error);
+        }
+        emit(UploadCommentPicErrorState());
+      });
+    }).catchError((error) {
+      if (kDebugMode) {
+        print('Error While putting the File ' + error);
+      }
+      emit(UploadCommentPicErrorState());
+    });
+  }
+
   
   void getComments(postId) {
     emit(GetCommentLoadingState());
@@ -856,6 +900,81 @@ final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     emit(DeleteCommentPicState());
   }
 
+
+// commentSub data
+
+  // List<CommentModel> commentsSub = [];
+  // CommentModel ? commentModelSub;
+  // File? postImage;
+
+  void commentPostSub({
+    required String? postId,
+    required String? postIdSub,
+     String ? comment,
+    Map<String, dynamic>? commentImage,
+    required String? time,
+    required String? date,
+  }) {
+    CommentModel commentModel = CommentModel(
+      name: socialUserModel!.name,
+      image: socialUserModel!.image,
+      commentText: comment,
+      commentImage: commentImage,
+      time: time, date: date,
+      dateTime: FieldValue.serverTimestamp());
+    emit(SocialCommentLoadingState());
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId).collection('subPost').doc(postIdSub)
+        .collection('comments')
+        .add(commentModel.toMap())
+        .then((value) {
+      getDetailPost(postId!);
+      emit(SocialCommentSuccessState());
+        }).catchError((error) {
+
+      if (kDebugMode) {
+        print(error.toString());
+      }
+      emit(SocialCommentErrorState(error.toString()));
+    });
+  }
+  
+
+  
+  void getCommentsSub(postId, postIdSub) {
+    emit(GetCommentSubLoadingState());
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId).collection('subPost').doc(postIdSub)
+        .collection("comments")
+        .orderBy('dateTime')
+        .snapshots()
+    .listen((event) {
+      comments.clear();
+      event.docs.forEach((element) {
+       comments.add(CommentModel.fromJson(element.data()));
+       emit(GetCommentSubSuccessState());
+      });
+    });
+  }
+  Future getCommentImageSub() async {
+    emit(UpdatePostLoadingState());
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    print('Selecting Image...');
+    if (pickedFile != null) {
+      commentImage = File(pickedFile.path);
+      print('Image Selected');
+      emit(GetCommentPicSubSuccessState());
+    } else {
+      print('No Image Selected');
+      emit(GetCommentPicSubErrorState());
+    }
+  }
+  // void popCommentImageSub() {
+  //   commentImage = null;
+  //   emit(DeleteCommentPicState());
+  // }
 
 //message data
   String? imageURL;
