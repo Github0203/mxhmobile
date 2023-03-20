@@ -3,6 +3,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:socialapp/modules/search/searchFriend.dart';
 
 import '../../modules/new_post/new_post.dart';
 import '../../shared/components/components.dart';
@@ -42,7 +43,9 @@ class SocialLayout extends StatelessWidget {
 
                }, icon: Icon(IconBroken.Notification,),
                ),
-         IconButton(onPressed: (){}, icon: Icon(IconBroken.Search,),
+         IconButton(onPressed: (){
+             navigateTo(context, SearchFriendPage());
+         }, icon: Icon(IconBroken.Search,),
          ),],
            ),
          body: cubit.screens[initialIndex],

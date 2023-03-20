@@ -18,6 +18,16 @@ class SocialGetUserErrorState extends SocialStates {
   SocialGetUserErrorState(this.error);
 }
 
+class SocialGetUserFriendLoadingState extends SocialStates {}
+
+class SocialGetUserFriendSuccessState extends SocialStates {}
+
+class SocialGetUserFriendErrorState extends SocialStates {
+  final String error;
+
+  SocialGetUserFriendErrorState(this.error);
+}
+
 class SocialGetAllUserLoadingState extends SocialStates {}
 
 class SocialGetAllUserSuccessState extends SocialStates {}
@@ -26,6 +36,26 @@ class SocialGetAllUserErrorState extends SocialStates {
   final String error;
 
   SocialGetAllUserErrorState(this.error);
+}
+
+class SocialGetAllVideoLoadingState extends SocialStates {}
+
+class SocialGetAllVideoSuccessState extends SocialStates {}
+
+class SocialGetAllVideoErrorState extends SocialStates {
+  final String error;
+
+  SocialGetAllVideoErrorState(this.error);
+}
+
+class SocialGetAllUserTokenLoadingState extends SocialStates {}
+
+class SocialGetAllUserTokenSuccessState extends SocialStates {}
+
+class SocialGetAllUserTokenErrorState extends SocialStates {
+  final String error;
+
+  SocialGetAllUserTokenErrorState(this.error);
 }
 
 class SocialChangeBottomNav extends SocialStates {}
@@ -48,11 +78,23 @@ class SocialAddSubPostLoadingState extends SocialStates {}
 
 class SocialAddSubPostSuccessState extends SocialStates {}
 
+class SocialAddSubAlbumErrorState extends SocialStates {}
+
+class SocialAddSubAlbumLoadingState extends SocialStates {}
+
+class SocialAddSubAlbumSuccessState extends SocialStates {}
+
 class SocialGetSubPostErrorState extends SocialStates {}
 
 class SocialGetSubPostLoadingState extends SocialStates {}
 
 class SocialGetSubPostSuccessState extends SocialStates {}
+
+class SocialAllPhotosErrorState extends SocialStates {}
+
+class SocialAllPhotosLoadingState extends SocialStates {}
+
+class SocialAllPhotosSuccessState extends SocialStates {}
 
 class SocialUploadProfileImageLoadingState extends SocialStates {}
 
@@ -68,6 +110,8 @@ class SocialUploadCoverErrorState extends SocialStates {}
 
 class SocialUserUpdateLoadingState extends SocialStates {}
 
+class SocialUserUpdateSuccessState extends SocialStates {}
+
 class SocialUserUpdateErrorState extends SocialStates {}
 
 class SocialCreatePostSuccessState extends SocialStates {}
@@ -75,6 +119,12 @@ class SocialCreatePostSuccessState extends SocialStates {}
 class SocialCreatePostErrorState extends SocialStates {}
 
 class SocialCreatePostLoadingState extends SocialStates {}
+
+class SocialCreateAlbumSuccessState extends SocialStates {}
+
+class SocialCreateAlbumErrorState extends SocialStates {}
+
+class SocialCreateAlbumLoadingState extends SocialStates {}
 
 class SocialCreateFilePostSuccessState extends SocialStates {}
 
@@ -107,6 +157,57 @@ class SocialLikePostsErrorState extends SocialStates {
 
   SocialLikePostsErrorState(this.error);
 }
+
+class SocialLikePostsSubSuccessState extends SocialStates {}
+
+class SocialLikePostsSubLoadingState extends SocialStates {}
+
+class SocialLikePostsSubErrorState extends SocialStates {
+  final String error;
+
+  SocialLikePostsSubErrorState(this.error);
+}
+
+class SocialUserLikePostsLoadingState extends SocialStates {}
+
+class SocialUserLikePostsErrorState extends SocialStates {
+  final String error;
+
+  SocialUserLikePostsErrorState(this.error);
+}
+
+class SocialUserLikePostsSubSuccessState extends SocialStates {}
+
+class SocialUserLikePostsSubLoadingState extends SocialStates {}
+
+class SocialUserLikePostsSubErrorState extends SocialStates {
+  final String error;
+
+  SocialUserLikePostsSubErrorState(this.error);
+}
+
+class SocialUserDisLikePostsSuccessState extends SocialStates {}
+
+class SocialUserDisLikePostsLoadingState extends SocialStates {}
+
+class SocialUserDisLikePostsErrorState extends SocialStates {
+  final String error;
+
+  SocialUserDisLikePostsErrorState(this.error);
+}
+
+class SocialDisLikePostsSubSuccessState extends SocialStates {}
+
+class SocialDisLikePostsSubLoadingState extends SocialStates {}
+
+class SocialDisLikePostsSubErrorState extends SocialStates {
+  final String error;
+
+  SocialDisLikePostsSubErrorState(this.error);
+}
+
+
+
 
 class SocialCommentLoadingState extends SocialStates {}
 
@@ -201,3 +302,69 @@ class DeleteAllFilePickerErrorState extends SocialStates {}
 class ResetPostSuccessState extends SocialStates {}
 
 class ResetPostErrorState extends SocialStates {}
+
+class LoadAlbumLoadingState extends SocialStates {}
+
+class LoadAlbumErrorState extends SocialStates {}
+
+class LoadAlbumSuccessState extends SocialStates {}
+
+class LoadAlbumLevel1SuccessState extends SocialStates {}
+
+class LoadAlbumLevel1ErrorState extends SocialStates {}
+
+class LoadAlbumLevel2SuccessState extends SocialStates {}
+
+class LoadAlbumLevel2ErrorState extends SocialStates {}
+
+class GetThumbnailPathAlbumSuccessState extends SocialStates {}
+
+class CheckFollowerSuccessState extends SocialStates {}
+
+class CheckFollowerErrorState extends SocialStates {}
+
+class CheckFollowerLoadingState extends SocialStates {}
+
+class AddFollowerSuccessState extends SocialStates {}
+
+class AddFollowerLoadingState extends SocialStates {}
+
+class AddFollowerErrorState extends SocialStates {}
+
+class CheckAcceptSuccessState extends SocialStates {}
+
+class CheckAcceptErrorState extends SocialStates {}
+
+class UnFollowerSuccessState extends SocialStates {}
+
+class UnFollowerErrorState extends SocialStates {}
+
+class GetFollowerSuccessState extends SocialStates {}
+
+class GetFollowerErroeState extends SocialStates {}
+
+class CheckFriendsuccessState extends SocialStates {}
+
+class CheckFriendsErrorState extends SocialStates {}
+
+class CheckFriendsLoadingState extends SocialStates {}
+
+class AddFriendsSuccessState extends SocialStates {}
+
+class AddFriendsLoadingState extends SocialStates {}
+
+class AddFriendsErrorState extends SocialStates {}
+
+class UnFriendsSuccessState extends SocialStates {}
+
+class UnBothFriendsSuccessState extends SocialStates {}
+
+class UnFriendsErrorState extends SocialStates {}
+
+class GetFriendsSuccessState extends SocialStates {}
+
+class GetFriendsErroeState extends SocialStates {}
+
+class SendNotifiSuccessState extends SocialStates {}
+
+class SendNotifiErrorState extends SocialStates {}

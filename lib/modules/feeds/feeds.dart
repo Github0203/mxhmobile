@@ -20,7 +20,7 @@ import 'package:socialapp/layout/gallery/gallery_view.dart';
 import 'package:socialapp/modules/feeds/feedDetail.dart';
 import 'package:flutter/cupertino.dart';
 
-
+ 
 
 class Feeds extends StatelessWidget {
 
@@ -50,9 +50,14 @@ class Feeds extends StatelessWidget {
             double setheight = MediaQuery.of(context).size.height;
 
             return ConditionalBuilder(
-              condition: SocialCubit.get(context).posts1.isNotEmpty &&
+              condition: 
+              SocialCubit.get(context).posts1.isNotEmpty &&
                   SocialCubit.get(context).socialUserModel != null,
-              builder: (context) => SingleChildScrollView(
+              builder: (context) => 
+              userModel == null ?
+              Center(child: CircularProgressIndicator()) 
+              :
+              SingleChildScrollView(
                 physics: BouncingScrollPhysics(),
                 child: Column(
                   children: [
@@ -143,7 +148,7 @@ class Feeds extends StatelessWidget {
                     ListView.separated(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) => buildPost(SocialCubit.get(context).posts1[index],userModel,context, index,scaffoldKey, SocialCubit.get(context).posts1[index].subPost),
+                      itemBuilder: (context, index) => buildPost(SocialCubit.get(context).posts1[index],userModel,context, index,scaffoldKey, SocialCubit.get(context).posts1[index].albumImages),
                       separatorBuilder: (context, index) => SizedBox(
                         height: 8,
                       ),
@@ -155,7 +160,53 @@ class Feeds extends StatelessWidget {
                   ],
                 ),
               ),
-              fallback: (context) => Center(child:CircularProgressIndicator()),
+              
+              fallback: (context) => 
+              userModel == null ?
+              Center(child: CircularProgressIndicator()) 
+              :
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    navigateTo(context,SocialLayout(4));
+                                  },
+                                  child: CircleAvatar(
+                                      radius: 22,
+                                      backgroundImage:
+                                      NetworkImage('${userModel!.image}')),
+                                ),
+              
+                                TextButton(
+                                  onPressed: () {
+                                    navigateTo(context, NewPostScreen());
+                                  },
+                                  child: SizedBox(
+                                    width: 100,
+                                    child: Text("What is in your mind ...",
+                                      style: const TextStyle(color: Colors.grey),
+                                      textAlign: TextAlign.start,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                           Center(
+                            child:textModel(
+                              fontSize: 20,
+                              text: 'Chưa có bài viết nào'
+                              )
+                            ),
+                          ]
+                ),
+              )
             );
           },
         );
@@ -179,8 +230,8 @@ class Feeds extends StatelessWidget {
                 children: [
                   InkWell(
                     onTap: () {
-
-                    },
+                                    navigateTo(context,SocialLayout(4));
+                                  },
                     child: CircleAvatar(
                         radius: 22,
                         backgroundImage: NetworkImage('${model.image}')),
@@ -264,7 +315,7 @@ class Feeds extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection('posts')
                 .doc('${model.postId}')
-                .collection('subPost')
+                .collection('posts')
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -289,7 +340,6 @@ class Feeds extends StatelessWidget {
               return Center(
                 child:
                 Container(
-                  color: Colors.red,
                    width: MediaQuery.of(context).size.width - 26,
               height: urls.length == 1 ?
                       300 : 
@@ -347,7 +397,17 @@ class Feeds extends StatelessWidget {
               Row(
                 children: [
                   InkWell(
-                    onTap: () {},
+                    onTap: () async {
+                      SocialUserModel? postUser =
+                          SocialCubit.get(context).socialUserModel;
+                      await SocialCubit.get(context).likedByMe(
+                          
+                          postUser: postUser,
+                          context: context,
+                          // postModel: model,
+                          postId: model.postId,
+                                               );
+                    },
                     child: Row(
 
                       children: [
@@ -360,6 +420,7 @@ class Feeds extends StatelessWidget {
                           '${model.likes}',
                           style: TextStyle(fontSize: 13),
                         ),
+                        textModel(text: ' likes')
                       ],
                     ),
                   ),
@@ -433,16 +494,16 @@ class Feeds extends StatelessWidget {
 
                     },
                     child: Row(
-                      children: const [
-                        Icon(
-                          IconBroken.Heart,
-                          color: Colors.red,
-                          size: 20,
-                        ),
-                        Text(
-                          ' Like',
-                          style: TextStyle(fontSize: 13),
-                        ),
+                      children: [
+                        // Icon(
+                        //   IconBroken.Heart,
+                        //   color: Colors.red,
+                        //   size: 20,
+                        // ),
+                        // Text(
+                        //   SocialCubit.get(context).likedpost.toString(),
+                        //   style: TextStyle(fontSize: 13),
+                        // ),
                       ],
                     ),
                   ),
@@ -498,5 +559,6 @@ class Feeds extends StatelessWidget {
           ),
         ),
       );
+
 }
 

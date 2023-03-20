@@ -17,6 +17,7 @@ import 'package:multi_image_layout/multi_image_layout.dart';
 import 'dart:io';
 import 'package:socialapp/modules/addMedias/addMedias.dart';
 import 'package:socialapp/layout/gallery/gallery_view.dart';
+import 'package:socialapp/modules/feeds/feedDetailPost.dart';
 import 'package:flutter/cupertino.dart';
 
 // ignore: must_be_immutable
@@ -38,7 +39,7 @@ class feedDetail extends StatelessWidget {
       body: Builder(builder: (context) {
         // SocialCubit.get(context).getPosts();
         SocialCubit.get(context).getMyData();
-        SocialCubit.get(context).getDetailPost(idPost!);
+        SocialCubit.get(context).getDetailSubPost(idPost!);
 
         return BlocConsumer<SocialCubit, SocialStates>(
           listener: (context, state) {},
@@ -51,7 +52,8 @@ class feedDetail extends StatelessWidget {
             return ConditionalBuilder(
               condition: SocialCubit.get(context).posts2.isNotEmpty &&
                   SocialCubit.get(context).socialUserModel != null,
-              builder: (context) => SingleChildScrollView(
+              builder: (context) => 
+              SingleChildScrollView(
                 physics: BouncingScrollPhysics(),
                 child: Column(
                   children: [
@@ -65,7 +67,7 @@ class feedDetail extends StatelessWidget {
                           context,
                           index,
                           scaffoldKey,
-                          SocialCubit.get(context).posts1[index].subPost),
+                          SocialCubit.get(context).posts1[index].albumImages),
                       separatorBuilder: (context, index) => SizedBox(
                         height: 8,
                       ),
@@ -85,100 +87,114 @@ class feedDetail extends StatelessWidget {
                       itemBuilder: (context, index1) => 
               Center(
                 child: 
-                Card(
-                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                    elevation: 5,
-                    margin: EdgeInsets.zero,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 13),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Image.network(SocialCubit.get(context).posts2[index1].postImage.toString(),
-                            fit: BoxFit.fill,
-                            loadingBuilder: (BuildContext context,
-                                Widget child,
-                                ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress
-                                              .cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              );
-                            },
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () {},
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      IconBroken.Heart,
-                                      color: Colors.red,
-                                      size: 20,
-                                    ),
-                                    Text(
-                                         SocialCubit.get(context).posts2[index1].likes.toString(),
-                                      style: TextStyle(fontSize: 13),
-                                    ),
-                                    Text(
-                                         ' likes',
-                                      style: TextStyle(fontSize: 13),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              //if(model.comments != 0)
-                              Spacer(),
-                              InkWell(
-                                  onTap: () {
-                                    navigateTo(
-                                        context,
-                                        CommentsScreenSub(
-                                          likes: SocialCubit.get(context).posts2[index1].likes, 
-                                          postId: idPost,
-                                          postUid: SocialCubit.get(context).posts2[index1].uId,
-                                          postIdSub: SocialCubit.get(context).posts2[index1].postIdSub,
-                                          ));
-                                  },
+                GestureDetector(
+                  onTap: () => navigateTo(context, viewDetailPost(SocialCubit.get(context).posts1[index1].postId.toString(), SocialCubit.get(context).posts2[index1].postIdSub.toString())),
+                  child: Card(
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      elevation: 5,
+                      margin: EdgeInsets.zero,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 13),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Image.network(SocialCubit.get(context).posts2[index1].postImage.toString(),
+                              fit: BoxFit.fill,
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent? loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                  ),
+                                );
+                              },
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                InkWell(
+                                   onTap: () async {
+                        SocialUserModel? postUser =
+                            SocialCubit.get(context).socialUserModel;
+                        await SocialCubit.get(context).likedByMeSub(
+                            postUser: postUser,
+                            context: context,
+                            // postModel: model,
+                            postId: idPost,
+                            postIdSub: SocialCubit.get(context).posts2[index1].postIdSub.toString()
+                                                   );
+                      },
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       Icon(
-                                        IconBroken.Chat,
-                                        color: Colors.amber,
+                                        IconBroken.Heart,
+                                        color: Colors.red,
                                         size: 20,
                                       ),
                                       Text(
-                                        SocialCubit.get(context).posts2[index1].comments.toString(),
-                                          style: TextStyle(fontSize: 10)),
+                                           SocialCubit.get(context).posts2[index1].likes.toString(),
+                                        style: TextStyle(fontSize: 13),
+                                      ),
                                       Text(
-                                        " comments",
-                                        style: TextStyle(fontSize: 10),
+                                           ' likes',
+                                        style: TextStyle(fontSize: 13),
                                       ),
                                     ],
-                                  )),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ],
+                                  ),
+                                ),
+                                //if(model.comments != 0)
+                                Spacer(),
+                                InkWell(
+                                    onTap: () {
+                                      navigateTo(
+                                          context,
+                                          CommentsScreenSub(
+                                            likes: SocialCubit.get(context).posts2[index1].likes, 
+                                            postId: idPost,
+                                            postUid: SocialCubit.get(context).posts2[index1].uId,
+                                            postIdSub: SocialCubit.get(context).posts2[index1].postIdSub,
+                                            ));
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Icon(
+                                          IconBroken.Chat,
+                                          color: Colors.amber,
+                                          size: 20,
+                                        ),
+                                        Text(
+                                          SocialCubit.get(context).posts2[index1].comments.toString(),
+                                            style: TextStyle(fontSize: 10)),
+                                        Text(
+                                          " comments",
+                                          style: TextStyle(fontSize: 10),
+                                        ),
+                                      ],
+                                    )),
+                              ],
+                            ),
+                           
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                ),
               ),
                ),
             
@@ -305,7 +321,17 @@ class feedDetail extends StatelessWidget {
               Row(
                 children: [
                   InkWell(
-                    onTap: () {},
+                    onTap: () async {
+                      SocialUserModel? postUser =
+                          SocialCubit.get(context).socialUserModel;
+                      await SocialCubit.get(context).likedByMe(
+                          
+                          postUser: postUser,
+                          context: context,
+                          // postModel: model,
+                          postId: model.postId,
+                                               );
+                    },
                     child: Row(
                       children: [
                         Icon(
@@ -317,6 +343,7 @@ class feedDetail extends StatelessWidget {
                           '${model.likes}',
                           style: TextStyle(fontSize: 13),
                         ),
+                        textModel(text: ' likes')
                       ],
                     ),
                   ),
@@ -395,7 +422,8 @@ class feedDetail extends StatelessWidget {
                           postUser: postUser,
                           context: context,
                           postModel: model,
-                          postId: model.postId);
+                          postId: model.postId,
+                                               );
                     },
                     child: Row(
                       children: const [
@@ -455,6 +483,7 @@ class feedDetail extends StatelessWidget {
                   ),
                 ],
               ),
+             
               SizedBox(
                 height: 10,
               ),

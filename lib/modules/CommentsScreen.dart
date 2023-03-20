@@ -9,6 +9,8 @@ import '../models/social_model/social_user_model.dart';
 import '../shared/components/components.dart';
 import '../shared/components/constants.dart';
 import '../shared/styles/iconbroken.dart';
+import 'package:socialapp/modules/userLike/UserLike.dart';
+import 'package:flutter/cupertino.dart';
 
 class CommentsScreen extends StatelessWidget {
   var commentTextControl = TextEditingController();
@@ -55,7 +57,7 @@ class CommentsScreen extends StatelessWidget {
                             // navigateTo(context, WhoLikedScreen(postId));
                           },
                           child: Row(
-                            children: const [
+                            children: [
                               Icon(
                                 IconBroken.Heart,
                                 color: Colors.red,
@@ -63,8 +65,18 @@ class CommentsScreen extends StatelessWidget {
                               SizedBox(
                                 width: 5,
                               ),
-                              Text(
-                                'tap to see who like your post',
+                              InkWell
+                              (
+                                onTap: () {
+                                  
+                                           Navigator.push(
+    context, CupertinoPageRoute(
+      builder: (context) => UserLike(postId!)
+                                        ));
+                                  },
+                                child: Text(
+                                  'tap to see who like your post',
+                                ),
                               ),
 
                             ],

@@ -1,0 +1,81 @@
+// Improving upon the accepted answer, here is what I have in my code. I needed a way to identify many types of videos and images from the passed url.
+
+// Using path package to idetify the extension
+// Have a list of video and image extension
+import 'package:path/path.dart' as p;
+
+
+enum UrlType { IMAGE, VIDEO, UNKNOWN }
+
+class UrlTypeHelper {
+  static List<String> _image_types = [
+    'jpg',
+    'jpeg',
+    'jfif',
+    'pjpeg',
+    'pjp',
+    'png',
+    'svg',
+    'gif',
+    'apng',
+    'webp',
+    'avif'
+  ];
+
+  static List<String> _video_types = [
+    "3g2",
+    "3gp",
+    "aaf",
+    "asf",
+    "avchd",
+    "avi",
+    "drc",
+    "flv",
+    "m2v",
+    "m3u8",
+    "m4p",
+    "m4v",
+    "mkv",
+    "mng",
+    "mov",
+    "mp2",
+    "mp4",
+    "mpe",
+    "mpeg",
+    "mpg",
+    "mpv",
+    "mxf",
+    "nsv",
+    "ogg",
+    "ogv",
+    "qt",
+    "rm",
+    "rmvb",
+    "roq",
+    "svi",
+    "vob",
+    "webm",
+    "wmv",
+    "yuv"
+  ];
+
+  static UrlType getType(url) {
+    try {
+      Uri uri = Uri.parse(url);
+      String extension = p.extension(uri.path).toLowerCase();
+      if (extension.isEmpty) {
+        return UrlType.UNKNOWN;
+      }
+
+      extension = extension.split('.').last;
+      if (_image_types.contains(extension)) {
+        return UrlType.IMAGE;
+      } else if (_video_types.contains(extension)) {
+        return UrlType.VIDEO;
+      }
+    } catch (e) {
+      return UrlType.UNKNOWN;
+    }
+    return UrlType.UNKNOWN;
+  }
+}

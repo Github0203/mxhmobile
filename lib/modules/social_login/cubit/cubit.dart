@@ -48,6 +48,7 @@ class SocialLoginCubit extends Cubit<SocialLoginStates> {
     SocialUserModel model = SocialUserModel(
       uId: uId,
       name: name,
+      queryable: name!.toLowerCase(),
       phone: phone ?? '0000-000-0000',
       email: email,
       dateTime: FieldValue.serverTimestamp(),
@@ -138,6 +139,7 @@ class SocialLoginCubit extends Cubit<SocialLoginStates> {
     SocialUserModel model = SocialUserModel(
       uId: uId,
       name: name,
+      queryable: name!.toLowerCase(),
       phone: phone ?? '0000-000-0000',
       email: email,
       dateTime: FieldValue.serverTimestamp(),

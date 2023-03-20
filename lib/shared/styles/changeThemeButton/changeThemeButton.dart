@@ -44,7 +44,8 @@ AppCubit.get(context).isDarkMode!= switchControl;
         mainAxisAlignment: MainAxisAlignment.center,
         children:[ Transform.scale(
             scale: 1,
-            child: Switch(
+            child: 
+            Switch(
               onChanged: toggleSwitch,
               value: switchControl,
               activeColor: defaultColor,

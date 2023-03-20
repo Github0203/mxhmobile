@@ -12,7 +12,8 @@ class PostModel {
   String? name;
   String? text;
   List? tags;
-  List<PostModelSub>? subPost;
+  List<PostModelSub>? albumImages;
+  List<PostModelSub>? posts;
   String? postImage;
   String? uId;
   String? image;
@@ -21,11 +22,15 @@ class PostModel {
   String? postId;
   String? date;
   String? time;
+  String? nameAlbum;
+  String? des;
   FieldValue? dateTime;
 
 
   PostModel({
     this.name,
+    this.nameAlbum,
+    this.des,
     this.text,
     this.likes,
     this.image,
@@ -37,11 +42,15 @@ class PostModel {
     this.date,
     this.dateTime,
     this.tags,
-    this.subPost,
+    this.albumImages,
+    this.posts,
+   
   });
 
   PostModel.fromJson(Map<String, dynamic>? json) {
     name = json!['name'];
+    nameAlbum = json['nameAlbum'];
+    des = json['des'];
     text = json['text'];
     likes = json['likes'];
     comments = json['comments'];
@@ -52,7 +61,9 @@ class PostModel {
     time = json['time'];
     date = json['date'];
     tags = json['tags'];
-    subPost = json['subPost'];
+    albumImages = json['albumImages'];
+    albumImages = json['posts'];
+   
 
 
   }
@@ -64,6 +75,8 @@ class PostModel {
   Map<String, dynamic> toMap() {
     return {
       'name': name,
+      'nameAlbum': nameAlbum,
+      'des': des,
       'text': text,
       'comments': comments,
       'likes': likes,
@@ -75,7 +88,8 @@ class PostModel {
       'date': date,
       'dateTime': dateTime,
       'tags': tags,
-      'subModel': subPost,
+      'albumImages': albumImages,
+    
     };
   }
 }

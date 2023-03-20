@@ -80,6 +80,8 @@ PreferredSizeWidget  defaultAppBarNoPop({
   String ? title,
    List<Widget> ? actions,
 }) => AppBar(
+   shadowColor : Colors.blue ,
+elevation: 1,
   leading: IconButton(
     onPressed: ()
     {
@@ -232,31 +234,31 @@ void navigateAndFinish(context, widget) => Navigator.pushAndRemoveUntil(
 );
 
 
-void showToast({
-  required String text,
-  required ToastStates state,
-  double fontSize = 16,
-  int seconds = 5,
-}) =>
-    BotToast.showText(
-        text: text,
-        duration: Duration(seconds: seconds),
-        contentColor: toastColor(state),
-        clickClose: true,
-        align: Alignment(0, -0.9));
+  void showToast({
+    required String text,
+    required ToastStates state,
+    double fontSize = 16,
+    int seconds = 5,
+  }) =>
+      BotToast.showText(
+          text: text,
+          duration: Duration(seconds: seconds),
+          contentColor: toastColor(state),
+          clickClose: true,
+          align: Alignment(0, -0.9));
 
-enum ToastStates { SUCCESS, ERROR, WARNING }
+  enum ToastStates { SUCCESS, ERROR, WARNING }
 
-Color toastColor(ToastStates state) {
-  switch (state) {
-    case ToastStates.SUCCESS:
-      return Colors.green;
-    case ToastStates.ERROR:
-      return Colors.red;
-    case ToastStates.WARNING:
-      return Colors.yellow;
+  Color toastColor(ToastStates state) {
+    switch (state) {
+      case ToastStates.SUCCESS:
+        return Colors.green;
+      case ToastStates.ERROR:
+        return Colors.red;
+      case ToastStates.WARNING:
+        return Colors.yellow;
+    }
   }
-}
 
 Widget baseAlertDialog({
   required context,
@@ -456,3 +458,42 @@ Widget backButton(context) => Row(children: [
     ),
   ),
 ]);
+
+Widget textModel({
+  required String text,
+  Color? textColor,
+  double radius = 30,
+  // double? fontWeight,
+  double? fontSize,
+  colors,
+}) =>
+    Text(
+      text,
+      style: TextStyle(
+      color: colors,
+      fontSize: fontSize,
+    ),
+    );
+
+Widget textModel13({
+  required String text,
+  Color? textColor,
+  double radius = 30,
+  double? fontWeight,
+  double? fontSize,
+  colors,
+}) =>
+    Text(
+      text,
+      style: TextStyle(
+      color: Colors.black87,
+      fontSize: 13,
+    ),
+    );
+
+
+const defaulTextNoPost = 'No have any Posts';
+
+
+  double screenWidthComponent = double.infinity;
+  double screenHeightComponent = double.infinity;

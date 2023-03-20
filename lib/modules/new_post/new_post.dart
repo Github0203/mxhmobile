@@ -110,6 +110,7 @@ class NewPostScreen extends StatelessWidget {
                       // subPost: hinhs,
                       tag: [],
                       like: '0',
+                      getuId: socialUserModel.uId
                     );
                   } else {
                     // SocialCubit.get(context).uploadPost(
@@ -190,13 +191,13 @@ class NewPostScreen extends StatelessWidget {
                            onPressed: (){                        
                             SocialCubit.get(context).resetState();
                            },
-                          style:OutlinedButton.styleFrom(primary: Colors.blue)
+                          style:OutlinedButton.styleFrom(primary: Colors.blue)  
                         ),
                         ],
                       ),
                       SizedBox(height: 10,),
                        Container(
-                                height: heightElement*0.2,
+                                height: 250,
                                 color: Colors.amber,
                         child: SingleChildScrollView(
                           child: 

@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LikesModel
 {
-  String?uId;
+  String?uId; 
   String? name;
   String? image;
   FieldValue? dateTime;

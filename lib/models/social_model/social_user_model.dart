@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class SocialUserModel
 {
   String ? name;
+  String ? queryable;
    String  ?email;
    String ? phone;
    String ? uId;
@@ -13,11 +14,12 @@ class SocialUserModel
   FieldValue? dateTime;
 
   SocialUserModel({
-     this.name,  this.token, this.email , this.phone , this.uId, this.image , this.cover , this.bio ,  this.dateTime,
+     this.name, this.queryable,  this.token, this.email , this.phone , this.uId, this.image , this.cover , this.bio ,  this.dateTime,  
 });
   SocialUserModel.fromJson(Map<String,dynamic>?json)
   {
     name = json!['name'];
+    queryable = json!['queryable'];
     email = json['email'];
     token = json['token'];
 
@@ -33,6 +35,7 @@ class SocialUserModel
   {
     return {
       'name':name,
+      'queryable':queryable,
       'email':email,
       'phone':phone,
       'token': token,
@@ -40,7 +43,8 @@ class SocialUserModel
       'image':image,
       'cover':cover,
       'bio':bio,
-      'dateTime':dateTime
+      'dateTime':dateTime,
+    
 
     };
   }

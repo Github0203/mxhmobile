@@ -55,7 +55,7 @@ class SocialRegisterCubit extends Cubit<SocialRegisterStates>
   }
 
   void userCreate({
-    required String email,
+    required String email,  
     required String name,
     required String phone,
     required String uId,
@@ -67,6 +67,7 @@ class SocialRegisterCubit extends Cubit<SocialRegisterStates>
   {
     SocialUserModel model = SocialUserModel(
       name: name,
+      queryable: name.toLowerCase(),
       email: email,
       phone: phone,
       uId: uId,

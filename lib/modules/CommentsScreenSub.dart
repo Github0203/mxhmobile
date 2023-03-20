@@ -178,7 +178,7 @@ class CommentsScreenSub extends StatelessWidget {
                                           padding: EdgeInsets.zero,
                                           onPressed: () {
                                             SocialCubit.get(context)
-                                                .getCommentImage();
+                                                .getCommentImageSub();
                                           },
                                           icon: Icon(
                                             Icons.camera_alt_outlined,

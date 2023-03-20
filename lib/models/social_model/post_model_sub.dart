@@ -16,10 +16,12 @@ class PostModelSub {
   String? image;
   int? likes;
   int? comments;
+  String? postId;
   String? postIdSub;
   String? date;
   String? time;
   FieldValue? dateTime;
+  String? type;
 
 
   PostModelSub({
@@ -30,11 +32,13 @@ class PostModelSub {
     this.comments,
     this.uId,
     this.postImage,
+    this.postId,
     this.postIdSub,
     this.time,
     this.date,
     this.dateTime,
     this.tags,
+    this.type,
   });
 
   PostModelSub.fromJson(Map<String, dynamic>? json) {
@@ -42,6 +46,7 @@ class PostModelSub {
     text = json['text'];
     likes = json['likes'];
     comments = json['comments'];
+    postId = json['postId'];
     postIdSub = json['postIdSub'];
     uId = json['uId'];
     image = json['image'];
@@ -49,6 +54,7 @@ class PostModelSub {
     time = json['time'];
     date = json['date'];
     tags = json['tags'];
+    type = json['type'];
 
 
   }
@@ -63,6 +69,7 @@ class PostModelSub {
       'text': text,
       'comments': comments,
       'likes': likes,
+      'postId': postId,
       'postIdSub': postIdSub,
       'uId': uId,
       'image': image,
@@ -71,6 +78,7 @@ class PostModelSub {
       'date': date,
       'dateTime': dateTime,
       'tags': tags,
+      'type': type,
     };
   }
 }

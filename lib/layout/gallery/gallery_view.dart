@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:socialapp/shared/network/UrlTypeHelper';
+import 'package:socialapp/layout/video/video_player.dart';
 
 
 class PhotoGrid extends StatefulWidget {
@@ -60,15 +62,21 @@ class _PhotoGridState extends State<PhotoGrid> {
         int remaining = numImages - widget.maxImages!;
 
         // If no more are remaining return a simple image widget
-        if (remaining == 0) {
+        if (remaining == 0 ) {
           return GestureDetector(
 
             child: Container(
               child: 
+              UrlTypeHelper.getType(imageUrl) == UrlType.IMAGE ?
               Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
-              ),
+              )
+              :
+              UrlTypeHelper.getType(imageUrl) == UrlType.VIDEO ?
+              VideoThumbnail(imageUrl)
+              :
+              Container(),
 
             ),
             onTap: () => widget.onImageClicked!(index),
@@ -80,7 +88,16 @@ class _PhotoGridState extends State<PhotoGrid> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.network(imageUrl, fit: BoxFit.cover),
+                UrlTypeHelper.getType(imageUrl) == UrlType.IMAGE ?
+              Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+              )
+              :
+              UrlTypeHelper.getType(imageUrl) == UrlType.VIDEO ?
+              VideoThumbnail(imageUrl)
+              :
+              Container(),
                 Positioned.fill(
                   child: Container(
                     alignment: Alignment.center,
@@ -100,10 +117,16 @@ class _PhotoGridState extends State<PhotoGrid> {
           child: Container(
              width: setWidth - 26,
               // height: 300,
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-            ),
+            child: UrlTypeHelper.getType(imageUrl) == UrlType.IMAGE ?
+              Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+              )
+              :
+              UrlTypeHelper.getType(imageUrl) == UrlType.VIDEO ?
+              VideoThumbnail(imageUrl)
+              :
+              Container(),
           ),
           onTap: () => widget.onImageClicked!(index),
         );
