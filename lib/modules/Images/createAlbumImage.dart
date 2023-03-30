@@ -293,14 +293,14 @@ class createAlbumImage extends StatelessWidget {
                 Container(
                    width: MediaQuery.of(context).size.width - 26,
               height: urls.length == 1 ?
-                      300 : 
+                      250 : 
                       urls.length == 2 ?
                       210 :
                       urls.length == 3 ?
                       140 : 
                       urls.length >= 4 ?
                       400 : 0,
-
+color: Color.fromARGB(192, 175, 171, 171),
                   child: 
                   PhotoGrid(
                             imageUrls: urls,
@@ -426,7 +426,6 @@ class createAlbumImage extends StatelessWidget {
                     onTap: () async {
                       SocialUserModel ? postUser = SocialCubit.get(context).socialUserModel;
                       await SocialCubit.get(context).likedByMe(
-                          liked: true,
                           postUser: postUser,
                           context: context,
                           postModel: model,

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socialapp/layout/socialapp/sociallayout.dart';
 import 'package:socialapp/modules/feeds/feedDetail.dart';
-import 'package:socialapp/modules/new_post/new_post_personal.dart';
+import 'package:socialapp/modules/new_post/new_post_album.dart';
+import 'package:socialapp/modules/settings/Profile_screen_friend.dart';
 
 import '../../../layout/socialapp/cubit/cubit.dart';
 import '../../../layout/socialapp/cubit/state.dart';
@@ -46,7 +47,7 @@ class SearchFriendPage extends StatefulWidget {
 }
 
 class _SearchFriendPageState extends State<SearchFriendPage> {
-  String name = "";
+  String namesearch = "";
 
   // @override
   // void initState() {
@@ -60,9 +61,10 @@ class _SearchFriendPageState extends State<SearchFriendPage> {
   Widget build(BuildContext context) {
     bool loadingne = false;
      var scaffoldKey = GlobalKey<ScaffoldState>();
+     Stream streamQuery;
     return Builder(
       builder: (context) {
-         SocialCubit.get(context).getAllUsers();
+        //  SocialCubit.get(context).getAllUsersFriend(SocialCubit.get(context).socialUserModel!.uId.toString());
 
         return BlocConsumer<SocialCubit, SocialStates>(
           listener: (context,state){
@@ -77,7 +79,7 @@ class _SearchFriendPageState extends State<SearchFriendPage> {
               var profileImage = SocialCubit.get(context).profileImage;
               var coverImage = SocialCubit.get(context).coverImage;
               return ConditionalBuilder(
-                 condition: SocialCubit.get(context).users.isNotEmpty != null,
+                 condition: SocialCubit.get(context).usersfriend.isNotEmpty != null,
               builder: (context) =>
         Scaffold(
       appBar: AppBar(
@@ -93,52 +95,78 @@ class _SearchFriendPageState extends State<SearchFriendPage> {
                 prefixIcon: Icon(Icons.search), hintText: 'Search...'),
             onChanged: (val) {
               setState(() {
-                name = val;
+                namesearch = val;
+                //  streamQuery = FirebaseFirestore.instance.collection('queryable')
+                //         .where('fieldName', isGreaterThanOrEqualTo: name)
+                //         .where('fieldName', isLessThan: name +'z')
+                //         .snapshots();
               });
             },
           ),
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: (name != "" && name != null)
-            ? FirebaseFirestore.instance
-                .collection('users')
-                .where('name', isGreaterThanOrEqualTo: name, isLessThan: name.substring(0, name.length-1) + String.fromCharCode(name.codeUnitAt(name.length - 1) + 1))
-                .snapshots()
-            : FirebaseFirestore.instance.collection("users").snapshots(),
-        builder: (context, snapshot) {
-          return (snapshot.connectionState == ConnectionState.waiting)
-              ? Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot data = snapshot.data!.docs[index];
-                    return Card(
-                      child: Row(
-                        children: <Widget>[
-                          Text(name),
-                          Image.network(
-                            data['image'],
-                            width: 150,
-                            height: 100,
-                            fit: BoxFit.fill,
-                          ),
-                          SizedBox(
-                            width: 25,
-                          ),
-                          Text(
-                            data['name'],
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: 
+    //       (namesearch != "")
+    //           ? FirebaseFirestore.instance
+    //               .collection('users')
+    //               .where('queryable', isGreaterThanOrEqualTo: namesearch,
+    // isLessThan: namesearch + 'z')
+    //               .snapshots()
+              // : 
+              FirebaseFirestore.instance.collection("users").snapshots(),
+          builder: (context, snapshot) {
+            return (snapshot.connectionState == ConnectionState.waiting)
+                ? Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                  child: Container(
+                  width: setWidth-20,
+                  height: setheight *0.8,
+                    child: ListView.builder(
+                        itemCount: namesearch == '' ? 0 : snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot data = snapshot.data!.docs[index];
+                          
+                          return 
+                          data['queryable'].contains(namesearch) ?
+                          Column(
+                            children: [
+                              GestureDetector(
+                                onTap: (){
+          navigateTo(context, ProfileScreenFriend(  
+            userId: data['uId']
+          ));
         },
+                                child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                      CircleAvatar(
+                                                          radius: 25, backgroundImage: NetworkImage(
+                                                            // '${comment.image}'
+                                                            data['image'],
+                                                            )),
+                                                      SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      Text(data['name'],),
+                                      ],
+                                    ),
+                              ),
+                                  SizedBox(height: 10,)
+                            ],
+                          )
+                          :
+                          // Center(child: Text('No math any user'));
+                          Container();
+                        },
+                      ),
+                  ),
+                );
+          },
+        ),
       ),
     ),
                fallback: (context) => 

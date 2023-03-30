@@ -49,10 +49,10 @@ class _buttonanimationRequireFriendState extends State<buttonanimationRequireFri
 
           
       ButtonState.fail: IconedButton(
-          text: SocialCubit.get(context).checkfriend == true ? "Flollow1" : "Following1",
+          text:"Following1",
           
           icon: Icon(Icons.follow_the_signs_outlined, color: Colors.white),
-          color: SocialCubit.get(context).checkfriend == true ? Colors.deepPurple.shade500 : Colors.green.shade500,
+          color:  Colors.green.shade500,
            ),
       ButtonState.success: IconedButton(
           text: "Success",
@@ -86,6 +86,7 @@ class _buttonanimationRequireFriendState extends State<buttonanimationRequireFri
       case ButtonState.idle:
         //  stateTextWithIconFollow = ButtonState.loading;
         Future.delayed(Duration(seconds: 1), () {
+          // SocialCubit.get(context).getUserDataFriend(widget.uIdMine!);
           // stateTextWithIconFollow = ButtonState.loading;
            SocialCubit.get(context).AddFRIEND(userModelFriend: widget.getuserModelFriend, dateTime: DateFormat.jm().format(DateTime.now()),);
         });
@@ -100,7 +101,17 @@ class _buttonanimationRequireFriendState extends State<buttonanimationRequireFri
         // TODO: Handle this case.
         break;
     }
-   SocialCubit.get(context).sendPushMessageFriendRequire(widget.getuserModelFriend!.token.toString(), 'title1','body', SocialCubit.get(context).socialUserModel!.uId) ;
+    SocialCubit.get(context).AddNotification(
+      uIdReciver: widget.getuserModelFriend!.uId,
+      uIdSender: widget.uIdMine!,
+      image: SocialCubit.get(context).socialUserModel!.image.toString(),
+      title: 'You have 1 friend request from',
+      body: SocialCubit.get(context).socialUserModel!.name.toString(),
+      type: '1',
+      seen: 'no',
+      display: 'yes'
+      );
+   SocialCubit.get(context).sendPushMessageFriendRequire(widget.getuserModelFriend!.token.toString(), 'You have 1 friend request from',SocialCubit.get(context).socialUserModel!.name.toString(), SocialCubit.get(context).socialUserModel!.uId) ;
     // setState(() {
     //   if(SocialCubit.get(context).checkfriend == true) {
     //   stateTextWithIconFollowing = stateTextWithIconFollow;

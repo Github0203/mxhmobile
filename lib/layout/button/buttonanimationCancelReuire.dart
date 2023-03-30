@@ -51,10 +51,10 @@ class _buttonanimationCancelRequireState extends State<buttonanimationCancelRequ
 
           
       ButtonState.fail: IconedButton(
-          text: SocialCubit.get(context).checkfriend == true ? "Flollow1" : "Following1",
+          text: "Following1",
           
           icon: Icon(Icons.follow_the_signs_outlined, color: Colors.white),
-          color: SocialCubit.get(context).checkfriend == true ? Colors.deepPurple.shade500 : Colors.green.shade500,
+          color:  Colors.green.shade500,
            ),
       ButtonState.success: IconedButton(
           text: "Success",
@@ -87,9 +87,9 @@ class _buttonanimationCancelRequireState extends State<buttonanimationCancelRequ
     switch (stateTextWithIconFollow) {
       case ButtonState.idle:
         //  stateTextWithIconFollow = ButtonState.loading;
-        Future.delayed(Duration(seconds: 1), () {
-          SocialCubit.get(context).unFRIEND(widget.getuserModelFriend!.uId);
-        });
+          Future.delayed(Duration(seconds: 1), () {
+            SocialCubit.get(context).unFRIEND(widget.getuserModelFriend!.uId);
+          });
 
         break;
       case ButtonState.fail:

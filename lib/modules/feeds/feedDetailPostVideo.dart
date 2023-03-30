@@ -20,6 +20,8 @@ import 'package:socialapp/layout/gallery/gallery_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:socialapp/shared/network/UrlTypeHelper';
 import 'package:socialapp/layout/video/video_player.dart';
+import 'package:readmore/readmore.dart';
+import 'package:expandable/expandable.dart';
 
 // ignore: must_be_immutable
 class feedDetailPostVideo extends StatelessWidget {
@@ -53,7 +55,125 @@ feedDetailPostVideo( this.idPost,this.idPostSub);
               SingleChildScrollView(
                 physics: BouncingScrollPhysics(),
                 child: Column(
+                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                   SizedBox(height: 10,),
+                   Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(
+                      SocialCubit.get(context).getdetailpostview!.text.toString(),
+                         textAlign: TextAlign.left
+                                  ),
+                    ),
+                    SizedBox(height: 10,),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                                    children: [
+                                      Expanded(
+                      // height: 30,
+                      child: Column(
+                        children: [
+                          ListView.builder(
+                            physics: NeverScrollableScrollPhysics(),
+                            // scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                                            itemCount: SocialCubit.get(context).getdetailpostview!.tags!.length.clamp(0, 2),
+                                            itemBuilder: (context, indextag) {
+                                              return  Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 3.0),
+                            child: SizedBox(
+                              height: SocialCubit.get(context).getdetailpostview!.tags!.length < 3 ?
+                              26
+                              : SocialCubit.get(context).getdetailpostview!.tags!.length  == 3 ? 30 :
+                              SocialCubit.get(context).getdetailpostview!.tags!.length > 3 ?
+                               SocialCubit.get(context).getdetailpostview!.tags!.length * 4.5 : 0,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start  ,
+                                children: [
+                                  Text(
+                                    "# " + SocialCubit.get(context).getdetailpostview!.tags![indextag],
+                                    style: TextStyle(color: Colors.blue),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                                            },
+                                          ),
+                    SocialCubit.get(context).getdetailpostview!.tags!.length >= 3 ?     
+                         ExpandableNotifier(  // <-- Provides ExpandableController to its children
+                          child: Column(
+                            children: [
+                              Expandable(           // <-- Driven by ExpandableController from ExpandableNotifier
+                                collapsed: ExpandableButton(  // <-- Expands when tapped on the cover photo
+                                  child: Text('More...', style: TextStyle( 
+                          fontSize: 18,
+                          height: 2, //line height 200%, 1= 100%, were 0.9 = 90% of actual line height
+                          fontWeight: FontWeight.w300
+                      ),
+                      ),
+                                ),
+                                expanded: Column(  
+                                  children: [
+                                    
+                                    ListView.builder(
+                            physics: NeverScrollableScrollPhysics(),
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                                            itemCount: SocialCubit.get(context).getdetailpostview!.tags!.length -2,
+                                            itemBuilder: (context, indextag1) {
+                                              return  Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 3.0),
+                            child: SizedBox(
+                              height: SocialCubit.get(context).getdetailpostview!.tags!.length < 3 ?
+                              26
+                              : SocialCubit.get(context).getdetailpostview!.tags!.length  == 3 ? 30 :
+                              SocialCubit.get(context).getdetailpostview!.tags!.length > 3 ?
+                               SocialCubit.get(context).getdetailpostview!.tags!.length * 4.5 : 0,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start  ,
+                                children: [
+                                  Text(
+                                    "# " + SocialCubit.get(context).getdetailpostview!.tags!.sublist(2,SocialCubit.get(context).getdetailpostview!.tags!.length)[indextag1],
+                                    style: TextStyle(color: Colors.blue),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                                            },
+                                          ),
+                                    ExpandableButton(       // <-- Collapses when tapped on
+                                      child: Text("Hide",textAlign: TextAlign.left, style: TextStyle( 
+                          fontSize: 18,
+                          height: 2, //line height 200%, 1= 100%, were 0.9 = 90% of actual line height
+                          fontWeight: FontWeight.w300
+                      ),),
+                                    ),
+                                  ]
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                        :
+                        Container(),
+                               
+                                          
+                        ],
+                      ),
+                                      ),
+                                    ],
+                                  ),
+                    ),
+             
+             SizedBox(height: 10,),
                   
                   Card(
                     clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -366,14 +486,15 @@ feedDetailPostVideo( this.idPost,this.idPostSub);
                 ],
               ),
               myDivider(),
-              model.text != null
-                  ? Text(
-                      '${model.text}',
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    )
-                  : Text('${model.text}', style: TextStyle(fontSize: 20)),
+             model.text != null ?
+                            ReadMoreText(
+                  '${model.text}',
+                  trimLines: 2,
+                  colorClickableText: Colors.pink,
+                  trimMode: TrimMode.Line,
+                  trimCollapsedText: '...Show more',
+                  trimExpandedText: ' show less',
+                ) : Text(''),
               Row(
                 children: [
                   Padding(

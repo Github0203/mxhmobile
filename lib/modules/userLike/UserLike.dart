@@ -3,6 +3,7 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socialapp/models/social_model/post_model_sub.dart';
+import 'package:socialapp/modules/settings/Profile_screen_friend.dart';
 
 import '../../../layout/socialapp/cubit/cubit.dart';
 import '../../../layout/socialapp/cubit/state.dart';
@@ -56,21 +57,6 @@ class UserLike extends StatelessWidget {
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) => buildlikePost(SocialCubit.get(context).getpostsUserLike![index], context, scaffoldKey ),
-                      // Row(
-                      //       mainAxisAlignment: MainAxisAlignment.start,
-                      //                 crossAxisAlignment: CrossAxisAlignment.start,
-                      //                 children: [
-                      //                   CircleAvatar(
-                      //                       radius: 25, backgroundImage: NetworkImage(
-                      //                         // '${comment.image}'
-                      //                         SocialCubit.get(context).users[index].image.toString()
-                      //                         )),
-                      //                   SizedBox(
-                      //                     width: 5,
-                      //                   ),
-                      //                   Text(userModel!.name!),
-                      //   ],
-                      // ),
                       separatorBuilder: (context, index) => SizedBox(
                         height: 8,
                       ),
@@ -82,7 +68,7 @@ class UserLike extends StatelessWidget {
                   ],
                 ),
               ),
-              fallback: (context) => Center(child:CircularProgressIndicator()),
+              fallback: (context) => Center(child:Text('Not liker yet')),
             );
           },
         );
@@ -91,20 +77,27 @@ class UserLike extends StatelessWidget {
   }
 
   Widget buildlikePost(LikesModel model, context,GlobalKey<ScaffoldState> scaffoldKey, ) => 
-   Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        CircleAvatar(
-                                            radius: 25, backgroundImage: NetworkImage(
-                                              // '${comment.image}'
-                                              model.image.toString()
-                                              )),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(model.name!),
-                        ],
-                      );
+   InkWell(
+        onTap: (){
+          navigateTo(context, ProfileScreenFriend (  
+           userId: SocialCubit.get(context).socialUserModel!.uId
+          ));
+        },
+     child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          CircleAvatar(
+                                              radius: 25, backgroundImage: NetworkImage(
+                                                // '${comment.image}'
+                                                model.image.toString()
+                                                )),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(model.name!),
+                          ],
+                        ),
+   );
 }
 

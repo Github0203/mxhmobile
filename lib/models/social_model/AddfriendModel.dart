@@ -8,6 +8,8 @@ class FriendsModel
   String? image;
   String? idFriend;
   FieldValue? dateTime;
+  String? date;
+  String? time;
   String? accepted;
   String? requirer;
 
@@ -18,6 +20,8 @@ class FriendsModel
     this.image,
     this.idFriend,
     this.dateTime,
+    this.date,
+    this.time,
     this.accepted,
     this.requirer,
   });
@@ -26,6 +30,8 @@ class FriendsModel
     uId = json!['uId'];
     name = json['name'];
     idFriend = json['idFriend'];
+    date = json['date'];
+    time = json['time'];
     image = json['image'];
     accepted = json['accepted'];
     requirer = json['requirer'];
@@ -38,6 +44,8 @@ class FriendsModel
       'image':image,
       'idFriend':idFriend,
       'dateTime':dateTime,
+      'date':date,
+      'time':time,
       'accepted':accepted,
       'requirer':requirer,
 

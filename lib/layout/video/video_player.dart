@@ -73,14 +73,14 @@ class _VideoThumbnailState extends State<VideoThumbnail> {
             : Center(
                 child: CircularProgressIndicator(),
               ),
-        onTap: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => VideoViewer(widget.videoPath), //VideoViewer
-          //   ),
-          // );
-        },
+        // onTap: () {
+        //   // Navigator.push(
+        //   //   context,
+        //   //   MaterialPageRoute(
+        //   //     builder: (context) => VideoViewer(widget.videoPath), //VideoViewer
+        //   //   ),
+        //   // );
+        // },
       ),
     );
   }

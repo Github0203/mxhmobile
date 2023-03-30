@@ -7,6 +7,8 @@ class FollowerModel
   String? name;
   String? image;
   FieldValue? dateTime;
+  String? date;
+  String? time;
   String? idFollwer;
 
 
@@ -16,6 +18,8 @@ class FollowerModel
     this.image,
     this.dateTime,
     this.idFollwer,
+    this.date,
+    this.time,
   });
 
   FollowerModel.fromJson(Map<String, dynamic>? json){
@@ -23,6 +27,8 @@ class FollowerModel
     name = json['name'];
     image = json['image'];
     idFollwer = json['idFollwer'];
+    date = json['date'];
+    time = json['time'];
   }
 
   Map<String, dynamic> toMap (){
@@ -32,6 +38,8 @@ class FollowerModel
       'image':image,
       'dateTime':dateTime,
       'idFollwer':idFollwer,
+      'date':date,
+      'time':time,
 
     };
   }

@@ -17,6 +17,7 @@ import 'package:file_picker/file_picker.dart';
 // import 'package:flutter/foundation.dart';
 // import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:socialapp/models/social_model/NotificationModel.dart';
 import 'package:socialapp/models/social_model/post_model_sub.dart';
 // kết thúc import cho file picker
 
@@ -83,20 +84,29 @@ class SocialCubit extends Cubit<SocialStates> {
     });
   }
 
-  SocialUserModel? socialUserModelFriend = null;
-  void getUserDataFriend(String? uId) {
+  SocialUserModel? getsocialUserModelFriend;
+  SocialUserModel? getsocialUserModelfromFriend;
+  SocialUserModel? getsocialUserModelfromlMe;
+  List<String> valueTags = [];
+  List? valueTagsSub = [];
+  List<dynamic> valueTagsSubwhenCreate = [];
+  List<dynamic> valueTagsSubwhenCreateTemp = [];
+  void getUserDataFriend(String? uIdFriend) async{
+    // uId = CacheHelper.getData(key: 'uId');
+    
+  
+    print('');
+    print(uIdFriend);
+    await FirebaseFirestore.instance
+        .collection('users').doc(uIdFriend)
+        .snapshots()
+        .listen((event) async {
     emit(SocialGetUserFriendLoadingState());
-    uId = CacheHelper.getData(key: 'uId');
-    FirebaseFirestore.instance.collection('users').doc(uId).get().then((value) {
-      socialUserModelFriend = SocialUserModel.fromJson(value.data());
-      if (kDebugMode) {
-        print(socialUserModelFriend.toString());
-      }
-
+      getsocialUserModelFriend=null;
+      getsocialUserModelFriend = (SocialUserModel.fromJson(event.data()));
+      
       emit(SocialGetUserFriendSuccessState());
-    }).catchError((error) {
-      print(error.toString());
-      emit(SocialGetUserFriendErrorState(error.toString()));
+
     });
   }
 
@@ -133,7 +143,10 @@ class SocialCubit extends Cubit<SocialStates> {
 
   File? profileImage;
   File? coverImage;
+  int? countposts;
+  int? countpostsfriend;
   List<SocialUserModel> users = [];
+  List<SocialUserModel> usersfriend = [];
   // var picker = ImagePicker();
   final ImagePicker picker = ImagePicker();
 
@@ -157,6 +170,30 @@ class SocialCubit extends Cubit<SocialStates> {
         print(users.toString());
       }).catchError((error) {
         emit(SocialGetAllUserErrorState(error.toString()));
+      });
+    }
+  }
+
+  void getAllUsersFriend() {
+    // emit(SocialGetAllUserLoadingState());
+    usersfriend = [];
+    {
+      FirebaseFirestore.instance.collection('users').doc(socialUserModel!.uId).collection('friends').where('accepted', isEqualTo: 'yes').get().then((value) {
+        for (var element in value.docs) {
+          if (element.data()['uId'] != socialUserModel!.uId)
+          {
+            usersfriend.add(SocialUserModel.fromJson(element.data()));
+            print(usersfriend.length.toString());
+          }
+        }
+        print('8888888888888888888888888888888888      lay danh sach friend');
+        print(usersfriend.length);
+        // emit(SocialGetAllUserSuccessState());
+        // print(usersfriend.toString());
+        // print(socialUserModel!.uId);
+        // print(usersfriend.length.toString());
+      }).catchError((error) {
+        // emit(SocialGetAllUserErrorState(error.toString()));
       });
     }
   }
@@ -395,7 +432,7 @@ emit(SocialUserUpdateLoadingState());
   List<PostModel> posts1 = [];
   List<PostModelSub> posts2 = [];
 
-  // PostModel? postModel;
+  PostModel? postModel;
   // PostModel? postModel;
   PostModelSub? postModelSub;
   Random random = new Random();
@@ -461,7 +498,7 @@ emit(SocialUserUpdateLoadingState());
     String? time,
     // List<PlatformFile>? listMedia,
     List<PostModelSub>? subPost,
-    List? tag,
+    List<String>? tag,
     String? like,
     String? getuId,
   
@@ -472,13 +509,13 @@ emit(SocialUserUpdateLoadingState());
                                   uId: socialUserModel!.uId,
                                   image:image,
                                   text: postText,
-                                  // postImage: value,
                                   likes: 0,
                                   comments: 0,
                                   date: date,
                                   time: time,
                                   dateTime: FieldValue.serverTimestamp(),
-                                  tags: tag,
+                                  tags: valueTags,
+                                  tagsTemp: [],
                                  
                                   // subPost: toList1(),
                                 );
@@ -493,12 +530,16 @@ emit(SocialUserUpdateLoadingState());
                                   name:name,
                                   image:image,
                                   date: date,
-                                  uId: getuId
+                                  uId: getuId,
+                                  display: 'yes',
+                                  
                                 );
                                 
                                 print('đã lưu vào firestore');
                                 paths = null;
                                 print('55555555555555555555555555 gia tri cua postImage sau khi dat bang null la : --------------->' + value.id.toString());
+                                editsubpostTempWhenCreatePost = null;
+                                editsubpostDetailwhenCreate = null;
                                 emit(SocialCreatePostSuccessState());
 
                               }).catchError((error) {
@@ -515,16 +556,18 @@ emit(SocialUserUpdateLoadingState());
     String? postImage1,
     String? postIDSub,
     String? uId,
+    String? display,
   }){
 
-paths!.forEach((i) {
+editsubpostTempWhenCreatePost!.forEach((i) {
         firebase_storage.FirebaseStorage.instance
                     .ref()
                     .child('users/' + uId! + '/albumImage/${Uri
-                    .file(i.path.toString())
+                    // .file(i.path.toString())
+                    .file(i.postImage.toString())
                     .pathSegments
                     .last}')
-                    .putFile(File(i.path.toString()))
+                    .putFile(File(i.postImage.toString()))
                     .then((value) {
                   value.ref.getDownloadURL().then((value) {
                   
@@ -533,15 +576,18 @@ paths!.forEach((i) {
                                 name:name,
                                 uId: uId,
                                 image:image,
-                                text: '',
+                                text: i.text,
                                 postImage: value.toString(),
                                 likes: 0,
                                 comments: 0,
                                 date: getDate(),
                                 time: DateFormat.jm().format(DateTime.now()),
                                 dateTime: FieldValue.serverTimestamp(),
-                                tags: [],
-                                type: 'posts'
+                                tags: i.tags,
+                                type: 'posts',
+                                display: display,
+                                textTemp: '',
+                                tagsTemp: []
                                 // postIdSub: postIDSub,
                               );
                                      FirebaseFirestore.instance
@@ -560,11 +606,6 @@ paths!.forEach((i) {
                                   }
                                   emit(SocialAddSubPostErrorState());
                                 });
-
-                                
-                
-                    // uploadPost(name: name, postText: postText, image: image, date: date, time: time, dateTime: dateTime, listMedia: listMedia, postImage1: value, tag: tag, like: like);
-
                   }).catchError((error) {
                     emit(SocialCreateFilePostErrorState());
                   });
@@ -573,8 +614,683 @@ paths!.forEach((i) {
                 });
     });
   }
-  
+  void editaddsubPost({
+    String? idDoc,
+    String? name,
+    String? image,
+    String? postText,
+    String? date,
+    String? postImage1,
+    String? postIDSub,
+    String? uId,
+    String? display,
+  }){
 
+for (var i in editsubpostTemp!) {
+  (
+    (i.postImage!.split('.').last == 'jpg') ||
+    (i.postImage!.split('.').last == 'jpeg') ||
+    (i.postImage!.split('.').last == 'JPG') ||
+    (i.postImage!.split('.').last == 'png') ||
+    (i.postImage!.split('.').last == 'PNG') ||
+    (i.postImage!.split('.').last == 'mp4') 
+    ) ?
+        firebase_storage.FirebaseStorage.instance
+                    .ref()
+                    .child('users/' + uId! + '/posts/${Uri
+                    // .file(i.path.toString())
+                    .file(i.postImage.toString())
+                    .pathSegments
+                    .last}')
+                    .putFile(
+                      File(i.postImage.toString())
+                      )
+                    .then((value) {
+                  value.ref.getDownloadURL().then((value) {
+                  
+                  print('da luu file ===========================================');
+                  print(i.textTemp);
+                  
+                   PostModelSub modelSubeditpost = PostModelSub(
+                                name: socialUserModel!.name,
+                                uId: socialUserModel!.uId,
+                                image:socialUserModel!.image,
+                                text: i.textTemp ?? i.text,
+                                textTemp: '',
+                                tagsTemp: [],
+                                postImage: value.toString(),
+                                likes: 0,
+                                comments: 0,
+                                date: getDate(),
+                                time: DateFormat.jm().format(DateTime.now()),
+                                dateTime: FieldValue.serverTimestamp(),
+                                tags: i.tags == [] ? i.tags : i.tagsTemp,
+                                type: 'posts',
+                                display: 'yes',
+                                // postIdSub: postIDSub,
+                              );
+                                     FirebaseFirestore.instance
+                                    .collection('posts')
+                                    .doc(idDoc)
+                                    .collection('posts')
+                                    .add(modelSubeditpost.toMap())
+                                    .then((value) async{
+             
+                                      print('THÊM SUBPOST THÀNH CÔNG');
+                                      print(idDoc);
+                                 emit(SocialAddSubPostSuccessState());
+                                    }).catchError((error) {
+
+                                  if (kDebugMode) {
+                                    print(error.toString());
+                                  }
+                                  emit(SocialAddSubPostErrorState());
+                                });
+                  }).catchError((error) {
+                    emit(SocialCreateFilePostErrorState());
+                  });
+                }).catchError((error) {
+                  emit(SocialCreateFilePostErrorState());
+                }) 
+                : 
+                
+                FirebaseFirestore.instance.collection('posts').doc(idDoc).collection('posts').doc(i.postIdSub)
+            .update(({
+          'text': i.textTemp ?? i.text,
+          'textTemp': '',
+          'tags' : i.tags == [] ? i.tags : i.tagsTemp,
+          'tagsTemp' : [],
+        }));
+    }
+  }
+
+  void editaddsubPostAlbum({
+    String? idDoc,
+    String? name,
+    String? image,
+    String? postText,
+    String? date,
+    String? postImage1,
+    String? postIDSub,
+    String? uId,
+    String? display,
+  }){
+
+for (var i in editsubpostTemp!) {
+  (
+    (i.postImage!.split('.').last == 'jpg') ||
+    (i.postImage!.split('.').last == 'jpeg') ||
+    (i.postImage!.split('.').last == 'JPG') ||
+    (i.postImage!.split('.').last == 'png') ||
+    (i.postImage!.split('.').last == 'PNG') ||
+    (i.postImage!.split('.').last == 'mp4') 
+    ) ?
+        firebase_storage.FirebaseStorage.instance
+                    .ref()
+                    .child('users/' + uId! + '/albumImages/${Uri
+                    // .file(i.path.toString())
+                    .file(i.postImage.toString())
+                    .pathSegments
+                    .last}')
+                    .putFile(
+                      File(i.postImage.toString())
+                      )
+                    .then((value) {
+                  value.ref.getDownloadURL().then((value) {
+                  
+                  print('da luu file ===========================================');
+                  print(i.textTemp);
+                  
+                   PostModelSub modelSubeditpost = PostModelSub(
+                                name: socialUserModel!.name,
+                                uId: socialUserModel!.uId,
+                                image:socialUserModel!.image,
+                                text: i.textTemp ?? i.text,
+                                textTemp: '',
+                                tagsTemp: [],
+                                postImage: value.toString(),
+                                likes: 0,
+                                comments: 0,
+                                date: getDate(),
+                                time: DateFormat.jm().format(DateTime.now()),
+                                dateTime: FieldValue.serverTimestamp(),
+                                tags: i.tags == [] ? i.tags : i.tagsTemp,
+                                type: 'posts',
+                                display: 'yes',
+                                // postIdSub: postIDSub,
+                              );
+                                     FirebaseFirestore.instance
+                                    .collection('albumImages')
+                                    .doc(idDoc)
+                                    .collection('albumImages')
+                                    .add(modelSubeditpost.toMap())
+                                    .then((value) async{
+             
+                                      print('THÊM SUBPOST THÀNH CÔNG');
+                                      print(idDoc);
+                                 emit(SocialAddSubPostSuccessState());
+                                    }).catchError((error) {
+
+                                  if (kDebugMode) {
+                                    print(error.toString());
+                                  }
+                                  emit(SocialAddSubPostErrorState());
+                                });
+                  }).catchError((error) {
+                    emit(SocialCreateFilePostErrorState());
+                  });
+                }).catchError((error) {
+                  emit(SocialCreateFilePostErrorState());
+                }) 
+                : 
+                
+                FirebaseFirestore.instance.collection('albumImages').doc(idDoc).collection('albumImages').doc(i.postIdSub)
+            .update(({
+          'text': i.textTemp ?? i.text,
+          'textTemp': '',
+          'tags' : i.tags == [] ? i.tags : i.tagsTemp,
+          'tagsTemp' : [],
+        }));
+    }
+  }
+
+
+  ///////////////////////////////////////////////////////////////////////////// 
+  /////////// edit post
+    PostModel? editpost;
+    List<PostModelSub>? editsubpost;
+    List<PostModelSub>? editsubpostwhenchangeDes;
+    List<PostModelSub>? editsubpostTemp;
+    List<PostModelSub>? editsubpostTemp1;
+    String? textDesPost = '';
+    String? textDesPostTemp = '';
+    String? textNameAlbum = '';
+    String? textNameAlbumTemp = '';
+    String? textDesReset = '';
+    PostModelSub? editsubpostDetail;
+    List<String>? listDeleteTemp = [];
+  void geteditDetailPost(String idPost) {
+    editsubpostTemp = null;
+    textDesPost = '';
+      FirebaseFirestore.instance
+        .collection('posts').doc(idPost)
+        .snapshots()
+        .listen((event) async {
+      editpost=null;
+      editpost = (PostModel.fromJson(event.data()));
+      textDesPost = editpost!.text;
+      emit(SocialGetEditPostSuccessState());
+    });
+
+    //// get sub post
+    FirebaseFirestore.instance
+        .collection('posts').doc(idPost).collection('posts')
+        .orderBy('dateTime', descending: true)
+        .snapshots()
+        .listen((event) async {
+      editsubpost=[];
+      event.docs.forEach((element) async {
+        editsubpost!.add(PostModelSub.fromJson(element.data()));
+        
+        print('------------------------------------------->>>>>>>>>>');
+      print(editsubpost!.length);
+
+        editsubpostTemp = editsubpost;
+
+      print('editsubpostTemp -------------------------------->>>>>>>>>>:  ' + editsubpostTemp!.length.toString());
+      // print(editsubpostwhenchangeDes!.length);
+      });
+  
+      emit(SocialGetEditSubPostSuccessState());
+    });
+  }
+  void geteditDetailPostDetail(int? id) {
+     for(int i = 0; i< editsubpostTemp!.length; i++){
+       if(i == id){
+        editsubpostDetail = editsubpostTemp![id!];
+       }
+       print('id la:        ' + id.toString());
+       print('i la:        ' + i.toString());
+       print('postImahe la:        ' + editsubpostDetail!.postImage.toString());
+    }
+    
+    emit(GetEditItemTempSuccessState());
+  }
+  
+  void deleteItemeditSubpost(int? id, String? gettextDes) {
+    // editsubpost!.removeAt(id!);
+    editsubpostTemp!.removeAt(id!);
+    textDesPost = gettextDes;
+    emit(DeleteIndexMultiPicSuccessState());
+  }
+
+  void editItemeditSubpost(int? id, String? text, String? idPost, String? idSubPost) async{
+    for(int i = 0; i< editsubpostTemp!.length; i++){
+       if(i == id){
+            editsubpostTemp![id!].textTemp = text;
+            editsubpostTemp![id!].tagsTemp = valueTagsSub;
+        print('------------------------------------------------->>>>>>>>>> ' + editsubpostTemp![id!].textTemp.toString());
+       }
+      
+    }
+    emit(EditItemTempSuccessState());
+  }
+
+  void editItemeditSubpostWhenCreate(int? id, String? text, List? tags) async{
+    for(int i = 0; i< editsubpostTempWhenCreatePost!.length; i++){
+       if(i == id){
+            editsubpostTempWhenCreatePost![id!].text = text;
+            editsubpostTempWhenCreatePost![id].tags = tags;
+       }
+      print( editsubpostTempWhenCreatePost![id!].text);
+      print(  editsubpostTempWhenCreatePost![id].tags);
+    }
+    emit(EditItemTempSuccessState());
+  }
+
+void getlistDeleteTemp(String? idTemp) {
+    if(idTemp != null){
+    listDeleteTemp = [idTemp, ...listDeleteTemp!];
+    }
+    print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH');
+    print(listDeleteTemp);
+   
+}
+
+
+Future<void> pickFilesEdit() async {
+    // resetState();
+    paths = null;
+      final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result == null) return;
+    else{
+    paths = result.files;
+    emit(UploadMultiPicSuccessState());
+    showToast(text: "Đã thêm ảnh", state: ToastStates.SUCCESS);
+      editsubpostTemp1 = [];
+    paths!.forEach((element) {
+      PostModelSub modelSub = PostModelSub(
+                                name:socialUserModel!.name,
+                                uId: socialUserModel!.uId,
+                                image:socialUserModel!.image,
+                                text: '',
+                                postImage: element.path!,
+                                likes: 0,
+                                comments: 0,
+                                date: getDate(),
+                                time: DateFormat.jm().format(DateTime.now()),
+                                dateTime: FieldValue.serverTimestamp(),
+                                tags: [],
+                                type: 'posts',
+                                display: 'yes',
+                                // postIdSub: postIDSub,
+                              );
+      editsubpostTemp1!.add(modelSub);
+      
+    });
+    print('editsubpost la:   ' + editsubpost!.length.toString());
+    editsubpostTemp ??= [];
+    if(editsubpostTemp != null){
+        editsubpostTemp = [ ...editsubpostTemp!, ...editsubpostTemp1!];
+    }
+    
+    for(int i = 0; i< editsubpostTemp!.length; i++){
+        print('UID la:   ' + editsubpostTemp![i].uId.toString());
+        print('Ten hinh la:   ' + editsubpostTemp![i].postImage.toString());
+      }
+    print('path sau khi duoc them la:        >>>>>>>>>>>>>>');
+    print(editsubpostTemp!.length);
+      emit(SocialGetSubPostTempSuccessState());
+    }
+  }
+
+   void deleteSubPost(String? postId, String? subpostId) {
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId).collection('posts')
+        .doc(subpostId)
+        .delete()
+        .then((value) {
+      emit(DeleteSubPostSuccessState());
+    });
+  }
+
+   void   saveEditPostandSubPost(String? postId, String? text) async{
+    emit(SocialSaveEditSubPostLoadingState());
+    await FirebaseFirestore.instance.collection('posts').doc(postId)
+            .update(({
+          'text': text,
+          'textTemp': '',
+          'tags' : valueTags,
+          'tagsTemp' : [],
+        }));
+   
+if(editsubpostTemp != null){
+     listDeleteTemp!.forEach((element) {
+      deleteSubPost(postId, element);
+    });
+}
+      print('DA SAVEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
+      print(editsubpostTemp!.length);
+      editaddsubPost(idDoc: postId, uId: socialUserModel!.uId);
+   
+      emit(SocialSaveEditSubPostSuccessState());
+  }
+
+  void ResetPostandSubPost(String? postId, context) async{
+      textDesPost = '';
+      editsubpostTemp = null;
+      emit(ResetPostSuccessState());
+  }
+
+
+  void getTagsPosttoEdit(String? postId) {
+     FirebaseFirestore.instance
+        .collection('posts').doc(postId)
+        .snapshots()
+        .listen((event) async {
+      valueTags=[];
+      valueTags = List<String>.from(event['tags']);
+      // emit(GetTagsPostSuccessState());
+    });
+  }
+
+  void getTagsSubPosttoEdit(String? postId, String? subpostId) {
+     FirebaseFirestore.instance
+        .collection('posts').doc(postId).collection('posts').doc(subpostId)
+        .snapshots()
+        .listen((event) async {
+      valueTagsSub=[];
+      if(event['tags'] != null){
+      valueTagsSub = List<String>.from(event['tags']);
+      }
+      // emit(GetTagsPostSuccessState());
+    });
+  }
+  void getTagsSubPosttoEditwhenCreate(int? id) {
+    valueTagsSubwhenCreate=[];
+     for(int i = 0; i< editsubpostTempWhenCreatePost!.length; i++){
+       if(i == id){
+        // var map = Map<String, dynamic>.from(editsubpostTempWhenCreatePost![id!].tags as Map<dynamic, dynamic>);
+        valueTagsSubwhenCreate = editsubpostTempWhenCreatePost![id!].tags!;
+       }
+    }
+    print('id cua subpost la:         '+ id.toString());
+    print('valueTagsSubwhenCreate:         '+ valueTagsSubwhenCreate.toString());
+  }
+
+   PostModelSub? editsubpostDetailwhenCreate;
+  void geteditDetailPostDetailwhenCreate(int? id) {
+     for(int i = 0; i< editsubpostTempWhenCreatePost!.length; i++){
+      print('i laf: --------------------'+ i.toString());
+      print('id laf: --------------------'+ id.toString());
+       if(i == id){
+        editsubpostDetailwhenCreate = editsubpostTempWhenCreatePost![id!];
+       }
+    }
+    emit(GetEditItemTempSuccessState());
+  }
+
+  /////////// ket thuc edit post
+ ///////////////////////////////////////////////////////////////////////////// 
+ ///
+ ///
+ 
+
+
+ ///////////////////////////////////////////////////////////////////////////// 
+  /////////// edit post Album
+  void geteditDetailPostAlbum(String idPost) {
+    editsubpostTemp = null;
+    textDesPost = '';
+      FirebaseFirestore.instance
+        .collection('albumImages').doc(idPost)
+        .snapshots()
+        .listen((event) async {
+      editpost=null;
+      editpost = (PostModel.fromJson(event.data()));
+      textDesPost = editpost!.des;
+      textNameAlbum = editpost!.nameAlbum;
+      emit(SocialGetEditPostSuccessState());
+    });
+
+    //// get sub post
+    FirebaseFirestore.instance
+        .collection('albumImages').doc(idPost).collection('albumImages')
+        .orderBy('dateTime', descending: true)
+        .snapshots()
+        .listen((event) async {
+      editsubpost=[];
+      event.docs.forEach((element) async {
+        editsubpost!.add(PostModelSub.fromJson(element.data()));
+        
+        print('------------------------------------------->>>>>>>>>>');
+      print(editsubpost!.length);
+
+        editsubpostTemp = editsubpost;
+
+      print('editsubpostTemp -------------------------------->>>>>>>>>>:  ' + editsubpostTemp!.length.toString());
+      // print(editsubpostwhenchangeDes!.length);
+      });
+  
+      emit(SocialGetEditSubPostSuccessState());
+    });
+  }
+  void geteditDetailPostAlbumDetail(int? id) {
+     for(int i = 0; i< editsubpostTemp!.length; i++){
+       if(i == id){
+        editsubpostDetail = editsubpostTemp![id!];
+       }
+       print('id la:        ' + id.toString());
+       print('i la:        ' + i.toString());
+       print('postImahe la:        ' + editsubpostDetail!.postImage.toString());
+    }
+    
+    emit(GetEditItemTempSuccessState());
+  }
+  
+  void deleteItemeditSubpostAlbum(int? id, String? gettextDes) {
+    // editsubpost!.removeAt(id!);
+    editsubpostTemp!.removeAt(id!);
+    textDesPost = gettextDes;
+    emit(DeleteIndexMultiPicSuccessState());
+  }
+
+  void editItemeditSubpostAlbum(int? id, String? text, String? idPost, String? idSubPost) async{
+   
+    for(int i = 0; i< editsubpostTemp!.length; i++){
+   
+       if(i == id){
+        print('valueTagsSub------------------------------------------------->>>>>>>>>> ' + valueTagsSub!.toString());
+            editsubpostTemp![id!].textTemp = text;
+            editsubpostTemp![id!].tagsTemp = valueTagsSub;
+            print('id laaaaaaaaaaaaaaaaaaaaa           :      ' + id.toString());
+            print('i laaaaaaaaaaaaaaaaaaaaa           :      ' + i.toString());
+        print('------------------------------------------------->>>>>>>>>> ' + editsubpostTemp![id!].textTemp.toString());
+        print('------------------------------------------------->>>>>>>>>> ' + editsubpostTemp![id!].tagsTemp.toString());
+       }
+      
+    }
+    emit(EditItemTempSuccessState());
+  }
+
+
+
+  void editItemeditSubpostAlbumWhenCreate(int? id, String? text, List? tags) async{
+     print('valueTagsSubwhenCreateTemp la:   ' + valueTagsSubwhenCreateTemp.toString());
+    for(int i = 0; i< editsubpostTempWhenCreatePost!.length; i++){
+       if(i == id){
+            editsubpostTempWhenCreatePost![id!].text = text;
+            editsubpostTempWhenCreatePost![id].tags = valueTagsSubwhenCreateTemp;
+       }
+      print('text la:   ' + editsubpostTempWhenCreatePost![id!].text.toString());
+      print('tags la:   ' +  editsubpostTempWhenCreatePost![id].tags.toString());
+    }
+    emit(EditItemTempSuccessState());
+  }
+  
+void getlistDeleteTempAlbum(String? idTemp) {
+    if(idTemp != null){
+    listDeleteTemp = [idTemp, ...listDeleteTemp!];
+    }
+    print('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH');
+    print(listDeleteTemp);
+   
+}
+
+
+Future<void> pickFilesEditAlbum() async {
+    // resetState();
+    paths = null;
+      final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result == null) return;
+    else{
+    paths = result.files;
+    emit(UploadMultiPicSuccessState());
+    showToast(text: "Đã thêm ảnh", state: ToastStates.SUCCESS);
+      editsubpostTemp1 = [];
+    paths!.forEach((element) {
+      PostModelSub modelSub = PostModelSub(
+                                name:socialUserModel!.name,
+                                uId: socialUserModel!.uId,
+                                image:socialUserModel!.image,
+                                text: '',
+                                textTemp: '',
+                                postImage: element.path!,
+                                likes: 0,
+                                comments: 0,
+                                date: getDate(),
+                                time: DateFormat.jm().format(DateTime.now()),
+                                dateTime: FieldValue.serverTimestamp(),
+                                tags: [],
+                                tagsTemp: [],
+                                type: 'album',
+                                display: 'yes',
+                                // postIdSub: postIDSub,
+                              );
+      editsubpostTemp1!.add(modelSub);
+      
+    });
+    print('editsubpost la:   ' + editsubpost!.length.toString());
+    editsubpostTemp ??= [];
+    if(editsubpostTemp != null){
+        editsubpostTemp = [ ...editsubpostTemp!, ...editsubpostTemp1!];
+    }
+    
+    for(int i = 0; i< editsubpostTemp!.length; i++){
+        print('UID la:   ' + editsubpostTemp![i].uId.toString());
+        print('Ten hinh la:   ' + editsubpostTemp![i].postImage.toString());
+      }
+    print('path Album sau khi duoc them la:        >>>>>>>>>>>>>>');
+    print(editsubpostTemp!.length);
+      emit(SocialGetSubPostTempSuccessState());
+    }
+  }
+
+   void deleteSubPostAlbum(String? postId, String? subpostId) {
+    FirebaseFirestore.instance
+        .collection('albumImages')
+        .doc(postId).collection('albumImages')
+        .doc(subpostId)
+        .delete()
+        .then((value) {
+      emit(DeleteSubPostSuccessState());
+    });
+  }
+
+   void   saveEditPostandSubPostAlbum(String? postId) async{
+    emit(SocialSaveEditSubPostLoadingState());
+    print('textNameAlbumTemp la        : ' + textNameAlbumTemp.toString());
+    print('textDesPostTemp la        : ' + textDesPostTemp.toString());
+    await FirebaseFirestore.instance.collection('albumImages').doc(postId)
+            .update(({
+          'nameAlbum': textNameAlbumTemp ==  '' ? textNameAlbum : textNameAlbumTemp,
+          'nameAlbumTemp': '',
+          'des': textDesPostTemp == '' ? textDesPost : textDesPostTemp,
+          'desTemp': '',
+          'tags' : valueTags,
+          'tagsTemp' : [],
+        }));
+   
+if(editsubpostTemp != null){
+     listDeleteTemp!.forEach((element) {
+      deleteSubPostAlbum(postId, element);
+    });
+}
+      print('DA SAVEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
+      print(editsubpostTemp!.length);
+      editaddsubPostAlbum(idDoc: postId, uId: socialUserModel!.uId);
+   
+      emit(SocialSaveEditSubPostSuccessState());
+  }
+
+  void ResetPostandSubPostAlbum(String? postId, context) async{
+      textDesPost = '';
+      editsubpostTemp = null;
+      emit(ResetPostSuccessState());
+  }
+
+
+  void getTagsPostAlbumtoEdit(String? postId) {
+     FirebaseFirestore.instance
+        .collection('albumImages').doc(postId)
+        .snapshots()
+        .listen((event) async {
+      valueTags=[];
+      valueTags = List<String>.from(event['tags']);
+      // emit(GetTagsPostSuccessState());
+    });
+  }
+
+  void getTagsSubPostAlbumtoEdit(String? postId, String? subpostId) {
+     FirebaseFirestore.instance
+        .collection('poalbumImagessts').doc(postId).collection('albumImages').doc(subpostId)
+        .snapshots()
+        .listen((event) async {
+      valueTagsSub=[];
+      if(event['tags'] != null){
+      valueTagsSub = List<String>.from(event['tags']);
+      }
+      // emit(GetTagsPostSuccessState());
+    });
+  }
+  void getTagsSubPostAlbumtoEditwhenCreate(int? id) {
+    valueTagsSubwhenCreate=[];
+    print('tags cua subpost Album la:         '+ valueTagsSubwhenCreate.toString());
+     for(int i = 0; i< editsubpostTempWhenCreatePost!.length; i++){
+       if(i == id){
+        // var map = Map<String, dynamic>.from(editsubpostTempWhenCreatePost![id!].tags as Map<dynamic, dynamic>);
+        valueTagsSubwhenCreate = editsubpostTempWhenCreatePost![id!].tags!;
+        print('tags cua subpost Album la:         '+ editsubpostTempWhenCreatePost![id!].tags.toString());
+       }
+    }
+    print('id cua subpost Album la:         '+ id.toString());
+    print('valueTagsSubwhenCreate Album         '+ valueTagsSubwhenCreate.toString());
+  }
+
+  
+  void geteditDetailPostAlbumDetailwhenCreate(int? id) {
+     for(int i = 0; i< editsubpostTempWhenCreatePost!.length; i++){
+      print('i laf: --------------------'+ i.toString());
+      print('id laf: --------------------'+ id.toString());
+       if(i == id){
+        editsubpostDetailwhenCreate = editsubpostTempWhenCreatePost![id!];
+        valueTagsSubwhenCreateTemp = editsubpostTempWhenCreatePost![id!].tags!;
+       print('tags cua subpost Album la:         '+ editsubpostTempWhenCreatePost![id!].tags.toString());
+       print('valueTagsSubwhenCreateTemp luc goi la:         '+ valueTagsSubwhenCreateTemp.toString());
+        emit(GetEditItemTempSuccessState());
+       }
+    }
+   
+  }
+
+  /////////// ket thuc edit post Album
+ ///////////////////////////////////////////////////////////////////////////// 
+ ///
+ ///
+
+
+  
 
     PostModelSub? getdetailpostview;
   void viewDetailPost(String idPost, String idPostSub) {
@@ -639,6 +1355,7 @@ paths!.forEach((i) {
           'comments':comments.docs.length,
           'postId': idPost,
           'postIdSub': element.id,
+          // 'textTemp': ''
         }));
       });
       emit(SocialGetSubPostSuccessState());
@@ -691,7 +1408,6 @@ paths!.forEach((i) {
         }));
       });
       emit(SocialGetSubPostSuccessState());
-
     });
 
   }
@@ -701,6 +1417,56 @@ List<LikesModel>? getpostsUserLike=[];
   void getDetailUserLikePost(String idPost) {
       FirebaseFirestore.instance
         .collection('posts').doc(idPost).collection('likes')
+        .orderBy('dateTime', descending: true)
+        .snapshots()
+        .listen((event) async {
+      getpostsUserLike=[];
+      event.docs.forEach((element) async {
+        getpostsUserLike!.add(LikesModel.fromJson(element.data()));
+      print(element);
+      });
+      emit(SocialUserLikePostsSubSuccessState());
+    });
+
+  }
+
+  void getDetailUserLikePostSub(String idPost, String idPostSub) {
+      FirebaseFirestore.instance
+        .collection('posts').doc(idPost).collection('posts').doc(idPostSub).collection('likes')
+        .orderBy('dateTime', descending: true)
+        .snapshots()
+        .listen((event) async {
+      getpostsUserLike=[];
+      event.docs.forEach((element) async {
+        getpostsUserLike!.add(LikesModel.fromJson(element.data()));
+      print(element);
+      });
+      emit(SocialUserLikePostsSubSuccessState());
+
+    });
+
+  }
+
+  void getDetailUserLikePostAlbum(String idPost) {
+      FirebaseFirestore.instance
+        .collection('albumImages').doc(idPost).collection('albumImages')
+        .orderBy('dateTime', descending: true)
+        .snapshots()
+        .listen((event) async {
+      getpostsUserLike=[];
+      event.docs.forEach((element) async {
+        getpostsUserLike!.add(LikesModel.fromJson(element.data()));
+      print(element);
+      });
+      emit(SocialUserLikePostsSubSuccessState());
+
+    });
+
+  }
+
+  void getDetailUserLikePostAlbumSub(String idPost, String idPostSub) {
+      FirebaseFirestore.instance
+        .collection('albumImages').doc(idPost).collection('albumImages').doc(idPostSub).collection('likes')
         .orderBy('dateTime', descending: true)
         .snapshots()
         .listen((event) async {
@@ -727,14 +1493,103 @@ List<LikesModel>? getpostsUserLike=[];
       showToast(text: "Post Deleted", state: ToastStates.ERROR);
       emit(DeletePostSuccessState());
     });
+    getPosts();
+  }
+  void deletePostAlbum(String? postId) {
+    FirebaseFirestore.instance
+        .collection('albumImages')
+        .doc(postId)
+        .delete()
+        .then((value) {
+      showToast(text: "Post Deleted", state: ToastStates.ERROR);
+      emit(DeletePostSuccessState());
+    });
+    getPosts();
   }
   void removePostImage() {
     postImage = null;
     emit(SocialRemovePostState());
   }
+
+  bool showpostiffollowing = false;
+  int? showNopost = 0;
   void getPosts() {
+    posts1 = [];
+    showpostiffollowing = false;
+    
     FirebaseFirestore.instance
         .collection('posts')
+        .orderBy('dateTime', descending: true)
+        .snapshots()
+        .listen((event) async {
+      
+      event.docs.forEach((element) async {
+        // showpostiffollowing = false;
+        final QuerySnapshot resultFollows =
+    await FirebaseFirestore.instance.collection('users').doc(element['uId']).collection('followers').where('uId', isEqualTo: 
+    socialUserModel!.uId).get();
+    final List <DocumentSnapshot> documentFollows = resultFollows.docs;
+    if (documentFollows.length > 0 ) { 
+        print('da follow showpostiffollowing la : ' + showpostiffollowing.toString());
+        showpostiffollowing = true;
+      } else {  
+      print('chua follow showpostiffollowing la');
+       showpostiffollowing = false;
+      }
+             print('showpostiffollowing : ' + showpostiffollowing.toString());
+             print('-----------------------------------------------');
+        
+        print('posts1 : ' + posts1.length.toString());
+        print('pppppppppppppppppppppppppppppppppppppppppppp');
+        print('element[uId] : ' + element['uId'].toString());
+        print('socialUserModel!.uId : ' + socialUserModel!.uId.toString());
+       
+          Future.delayed(Duration(seconds: 0), () async{
+        
+        if((element['uId'] == socialUserModel!.uId) || showpostiffollowing == true){
+        
+           posts1.add(PostModel.fromJson(element.data()));
+        print('posts1 sau khi check la : ' + posts1.length.toString());
+        var likes = await element.reference.collection('likes').get();
+        var comments = await element.reference.collection('comments').get();
+        await FirebaseFirestore.instance.collection('posts').doc(element.id)
+            .update(({
+          'likes':likes.docs.length,
+          'comments':comments.docs.length,
+          'postId': element.id,
+        }));
+         if(posts1.length == 0){
+          showNopost = -1;
+         }
+          emit(SocialGetPostsSuccessState());
+        }
+       });
+      });
+            
+    
+    });
+
+  }
+
+
+  void getPostsDetail(String? idPost) {
+     FirebaseFirestore.instance
+        .collection('posts').doc(idPost)
+        .snapshots()
+        .listen((event) async {
+      postModel=null;
+      postModel = (PostModel.fromJson(event.data()));
+      
+      emit(SocialGetDetailPostsSuccessState());
+
+    });
+    
+
+  }
+
+  void getPostsPersonal(String getuId) {
+    FirebaseFirestore.instance
+        .collection('posts').where('uId', isEqualTo: getuId )
         .orderBy('dateTime', descending: true)
         .snapshots()
         .listen((event) async {
@@ -817,7 +1672,7 @@ List<LikesModel>? getpostsUserLike=[];
           'postId': element.id,
         }));
       });
-      emit(SocialGetPostsSuccessState());
+      // emit(SocialGetPostsSuccessState());
     });
 
   }
@@ -827,15 +1682,12 @@ List<LikesModel>? getpostsUserLike=[];
   String likedsubpost = ' like';
   String colorlikedsubpost = ' like';
 
-  Future<bool> likedByMe(
+  Future<void> likedByMe(
       {context,
-        bool? liked,
         String? postId,
         PostModel? postModel,
         SocialUserModel? postUser}) async {
     emit(SocialLikePostsLoadingState());
-    bool isLikedByMe = false;
-    likedpost = '';
     FirebaseFirestore.instance
         .collection('posts')
         .doc(postId)
@@ -844,24 +1696,26 @@ List<LikesModel>? getpostsUserLike=[];
 
             var likes = await event.reference.collection('likes').where('uId', isEqualTo: socialUserModel!.uId).get();
       final List <DocumentSnapshot> documentLikes = likes.docs;
+      print('--------------------------------------------');
+      print(documentLikes.length);
       if(documentLikes.length > 0){
-        isLikedByMe = !isLikedByMe;
       documentLikes.forEach((element) {
-      disLikePost(postId, element.id);      
+      disLikePost(postId, element.id);  
+      print('da dislike post boi toi');    
       });
       }
-      if (isLikedByMe == false) {
-        likedpost = ' liked';
+      if(documentLikes.length <= 0){
         likePost(
+           dateTime: FieldValue.serverTimestamp().toString(),
             postId: postId,
             context: context,
             postModel: postModel,
-            postUser: postUser);
+            postUser: socialUserModel);
+            print('da like post boi toi');
       }
-      print(isLikedByMe);
       emit(SocialLikePostsSuccessState());
     });
-    return isLikedByMe;
+    return ;
   }
 
   Future<bool> likedByMeAlbum(
@@ -1036,6 +1890,12 @@ void disLikePostAlbum(String? postId, String? potIdLike) {
     }
   }
 
+
+  ///// view liker feed level1
+  ///
+  ///
+  
+
   
 
 
@@ -1047,6 +1907,8 @@ final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   String? _extension;
   
 
+  List<PostModelSub>? editsubpostTempWhenCreatePost_picker;
+  List<PostModelSub>? editsubpostTempWhenCreatePost;
   Future<void> pickFiles() async {
     // resetState();
       final result = await FilePicker.platform.pickFiles(allowMultiple: true);
@@ -1057,19 +1919,91 @@ final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     print('---------------------------------');
     print(paths.toString());
     showToast(text: "Đã thêm ảnh", state: ToastStates.SUCCESS);
+
+    editsubpostTempWhenCreatePost_picker = [];
+    paths!.forEach((element) {
+      PostModelSub modelSub = PostModelSub(
+                                name:socialUserModel!.name,
+                                uId: socialUserModel!.uId,
+                                image:socialUserModel!.image,
+                                text: '',
+                                postImage: element.path!,
+                                likes: 0,
+                                comments: 0,
+                                date: getDate(),
+                                time: DateFormat.jm().format(DateTime.now()),
+                                dateTime: FieldValue.serverTimestamp(),
+                                tags: [],
+                                type: 'posts',
+                                display: 'yes',
+                                // postIdSub: postIDSub,
+                              );
+      editsubpostTempWhenCreatePost_picker!.add(modelSub);
+    });
+    editsubpostTempWhenCreatePost ??= [];
+    if(editsubpostTempWhenCreatePost != null){
+        editsubpostTempWhenCreatePost = [ ...editsubpostTempWhenCreatePost!, ...editsubpostTempWhenCreatePost_picker!];
+    }
+    // editsubpostTempWhenCreatePost = [ ...editsubpostTempWhenCreatePost!, ...editsubpostTempWhenCreatePost_picker!];
+    for(int i = 0; i< editsubpostTempWhenCreatePost!.length; i++){
+        print('UID la:   ' + editsubpostTempWhenCreatePost![i].uId.toString());
+        print('Ten hinh la:   ' + editsubpostTempWhenCreatePost![i].postImage.toString());
+        print('Ten hinh la:   ' + editsubpostTempWhenCreatePost![i].tags.toString());
+      }
+    print('path sau khi duoc them la:        >>>>>>>>>>>>>>');
+    print(editsubpostTempWhenCreatePost!.length);
     }
   }
+  Future<void> pickFilesAlbum() async {
+    // resetState();
+      final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result == null) return;
+    else{
+    paths = result.files;
+    
+    print('---------------------------------');
+    print(paths.toString());
+    showToast(text: "Đã thêm ảnh", state: ToastStates.SUCCESS);
+
+    editsubpostTempWhenCreatePost_picker = [];
+    paths!.forEach((element) {
+      PostModelSub modelSub = PostModelSub(
+                                name:socialUserModel!.name,
+                                uId: socialUserModel!.uId,
+                                image:socialUserModel!.image,
+                                text: '',
+                                postImage: element.path!,
+                                likes: 0,
+                                comments: 0,
+                                date: getDate(),
+                                time: DateFormat.jm().format(DateTime.now()),
+                                dateTime: FieldValue.serverTimestamp(),
+                                tags: [],
+                                type: 'album',
+                                display: 'yes',
+                                // postIdSub: postIDSub,
+                              );
+      editsubpostTempWhenCreatePost_picker!.add(modelSub);
+    });
+    editsubpostTempWhenCreatePost ??= [];
+    if(editsubpostTempWhenCreatePost != null){
+        editsubpostTempWhenCreatePost = [ ...editsubpostTempWhenCreatePost!, ...editsubpostTempWhenCreatePost_picker!];
+    }
+    // editsubpostTempWhenCreatePost = [ ...editsubpostTempWhenCreatePost!, ...editsubpostTempWhenCreatePost_picker!];
+    for(int i = 0; i< editsubpostTempWhenCreatePost!.length; i++){
+        print('UID la:   ' + editsubpostTempWhenCreatePost![i].uId.toString());
+        print('Ten hinh la:   ' + editsubpostTempWhenCreatePost![i].postImage.toString());
+      }
+    print('path sau khi duoc them Album la:        >>>>>>>>>>>>>>');
+    print(editsubpostTempWhenCreatePost!.length);
+    }
+    emit(UploadMultiPicSuccessState());
+  }
     void deleteItempickFiles(int? id) {
-    paths!.removeAt(id!);
+    editsubpostTempWhenCreatePost!.removeAt(id!);
     emit(DeleteIndexMultiPicSuccessState());
-    // FirebaseFirestore.instance
-    //     .collection('posts')
-    //     .doc(postId)
-    //     .delete()
-    //     .then((value) {
-    //   showToast(text: "Post Deleted", state: ToastStates.ERROR);
-    //   emit(DeletePostSuccessState());
-    // });
+   print('path sau khi bi xoa Album la:        >>>>>>>>>>>>>>');
+    print(editsubpostTempWhenCreatePost!.length);    
   }
 
 
@@ -1113,7 +2047,15 @@ final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
  Future <void> resetState() async{
       fileName = null;
+      editsubpostTempWhenCreatePost = [];
+    emit( await DeleteAllFilePickerSuccessState());
+    // showToast(text: "Đã xóa thành công2", state: ToastStates.SUCCESS);
+  }
+
+ Future <void> resetStateEdit(String gettextDes) async{
+      fileName = null;
       paths = null;
+      textDesPost = gettextDes;
     emit( await DeleteAllFilePickerSuccessState());
     // showToast(text: "Đã xóa thành công2", state: ToastStates.SUCCESS);
   }
@@ -1209,6 +2151,7 @@ void likePostSubAlbum({context, String? postId,String? postIdSub, SocialUserMode
 
 //comment data
   List<CommentModel> comments = [];
+  List<LikesModel> likers = [];
   CommentModel ? commentModel;
   File? postImage;
 
@@ -1451,6 +2394,7 @@ void likePostSubAlbum({context, String? postId,String? postIdSub, SocialUserMode
   }
 
   
+  
   void getComments(postId) {
     emit(GetCommentLoadingState());
     FirebaseFirestore.instance
@@ -1464,6 +2408,19 @@ void likePostSubAlbum({context, String? postId,String? postIdSub, SocialUserMode
       event.docs.forEach((element) {
        comments.add(CommentModel.fromJson(element.data()));
        emit(GetCommentSuccessState());
+      });
+    });
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection("likes")
+        .orderBy('dateTime')
+        .snapshots()
+    .listen((event) {
+      likers.clear();
+      event.docs.forEach((element) {
+       likers.add(LikesModel.fromJson(element.data()));
+       emit(GetLikedLoadingState());
       });
     });
   }
@@ -1827,7 +2784,7 @@ void likePostSubAlbum({context, String? postId,String? postIdSub, SocialUserMode
     String? time,
     // List<PlatformFile>? listMedia,
     List<PostModelSub>? subPost,
-    List? tag,
+    List<String>? tags,
     String? like,
     String? des,
   }) {
@@ -1842,7 +2799,7 @@ void likePostSubAlbum({context, String? postId,String? postIdSub, SocialUserMode
                                   date: date,
                                   time: time,
                                   dateTime: FieldValue.serverTimestamp(),
-                                  tags: tag,
+                                  tags: valueTags,
                                   des: des,
                                   // subPost: toList1(),
                                 );
@@ -1850,8 +2807,9 @@ void likePostSubAlbum({context, String? postId,String? postIdSub, SocialUserMode
                             FirebaseFirestore.instance
                                   .collection('albumImages')
                                   .add(model.toMap())
-                                  .then((value) async{      
-                                print(value);
+                                  .then((value) async{     
+                                print('ID CUA POST ALBUM LA'); 
+                                print(value.id);
                                 addsubPostAlbumImage(
                                   idDoc: value.id.toString(),
                                   name:name,
@@ -1866,6 +2824,7 @@ void likePostSubAlbum({context, String? postId,String? postIdSub, SocialUserMode
                                 emit(SocialCreateAlbumSuccessState());
 
                               }).catchError((error) {
+                                print(error);
                                 emit(SocialCreateAlbumErrorState());
                               });
   }
@@ -1879,16 +2838,17 @@ void likePostSubAlbum({context, String? postId,String? postIdSub, SocialUserMode
     String? postImage1,
     String? postIDSub,
     String? uId,
+    List? tags,
   }){
 
-paths!.forEach((i) {
+editsubpostTempWhenCreatePost!.forEach((i) {
         firebase_storage.FirebaseStorage.instance
                     .ref()
-                    .child('users/'+ uId! + '/albumImage/${Uri
-                    .file(i.path.toString())
+                    .child('users/'+ uId! + '/albumImages/${Uri
+                    .file(i.postImage.toString())
                     .pathSegments
                     .last}')
-                    .putFile(File(i.path.toString()))
+                    .putFile(File(i.postImage.toString()))
                     .then((value) {
                   value.ref.getDownloadURL().then((value) {
                   
@@ -1897,15 +2857,17 @@ paths!.forEach((i) {
                                 name:name,
                                 uId: uId,
                                 image:image,
-                                text: '',
+                                text: i.text,
+                                textTemp: '',
                                 postImage: value.toString(),
                                 likes: 0,
                                 comments: 0,
                                 date: getDate(),
                                 time: DateFormat.jm().format(DateTime.now()),
                                 dateTime: FieldValue.serverTimestamp(),
-                                tags: [],
-                                type: 'albumImages'
+                                tags: i.tags,
+                                tagsTemp: [],
+                                type: 'album'
                                 // postIdSub: postIDSub,
                               );
                                      FirebaseFirestore.instance
@@ -1936,6 +2898,7 @@ paths!.forEach((i) {
                   emit(SocialCreateFilePostErrorState());
                 });
     });
+    editsubpostTempWhenCreatePost = [];
   }
 
 
@@ -1949,11 +2912,14 @@ void getAllAlbumImage() {
     List<PostModel> posts3 = [];
   List<PostModelSub> posts4 = [];
     int solist = 0;
-  List<ImageBean> getImageDataCubut() {
-// print('TTTTTTTTTTTTTT');
+  List<ImageBean> getImageDataCubut(String? getuId) {
+print('TTTTTTTTTTTTTT');
+print(getuId);
+// getUserDataFriend(getuId);
+print(getsocialUserModelFriend!.name);
 
      FirebaseFirestore.instance
-        .collection('albumImages')
+        .collection('albumImages').where('uId', isEqualTo: getuId )
         .orderBy('dateTime', descending: true)
         .snapshots()
         .listen((event) async {
@@ -1961,7 +2927,7 @@ void getAllAlbumImage() {
       posts3=[];
       event.docs.forEach((element) async {
         posts3.add(PostModel.fromJson(element.data()));
-
+        print(posts3.length);
         var likes = await element.reference.collection('likes').get();
         var comments = await element.reference.collection('comments').get();
         await FirebaseFirestore.instance.collection('albumImages').doc(element.id)
@@ -1974,13 +2940,13 @@ void getAllAlbumImage() {
 
 
 
-
+            print('CHUAN BI IN POSTS 4');
 
     
 
         // add post 2
          FirebaseFirestore.instance
-        .collection('albumImages').doc(element.id.toString()).collection('albumImages')
+        .collection('albumImages').doc(element.id.toString()).collection('albumImages').where('uId', isEqualTo: getuId )
         .orderBy('dateTime', descending: true)
         .snapshots()
         .listen((event1) async {
@@ -2000,11 +2966,11 @@ void getAllAlbumImage() {
         // await FirebaseFirestore.instance.collection('albumImages').doc(element.id.toString()).collection('subPost').doc(element1.id).get();
         // final List <DocumentSnapshot> documentsubPost = resultFriend.docs;
         final QuerySnapshot resulsubPost =
-    await FirebaseFirestore.instance.collection('albumImages').where('uId', isEqualTo: socialUserModel!.uId).get();
+    await FirebaseFirestore.instance.collection('albumImages').where('uId', isEqualTo: getuId).get();
 
     final List <DocumentSnapshot> resulsubPostDOCS = resulsubPost.docs;
 
-    solist = resulsubPostDOCS.length;
+    solist = posts3.length;
            
 
        
@@ -2031,6 +2997,7 @@ void getAllAlbumImage() {
         originalHeight: i == 0 ? 258 : null,
       ));
     }
+    print(imageList.toString());
     emit(GetThumbnailPathAlbumSuccessState());
       // print(imageList);
       //    print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
@@ -2078,8 +3045,7 @@ void getAllAlbumImage() {
     void checkFollowing(
       String? getuIdfriend, 
       // String? uIdFriend, 
-      SocialUserModel? userModelMine, 
-      String? dateTime) async{
+      SocialUserModel? userModelMine, ) async{
     
     // checkfollow = false;
     final QuerySnapshot resultFollows =
@@ -2093,28 +3059,81 @@ void getAllAlbumImage() {
     if (documentFollows.length > 0 ) { 
         print('da follow checkfollow la');
         checkfollow = false;
-        getFollowings(getuIdfriend);
+        showpostiffollowing = true;
         print(checkfollow);
-        emit(UnFriendsSuccessState());
+        getFollowers(getuIdfriend);
+        // emit(UnFriendsSuccessState());
       } else {  
       print('chua follow checkfollow la');
         checkfollow = true;
         print(checkfollow);
-        getFollowings(getuIdfriend);
-        emit(AddFriendsLoadingState());
+        getFollowers(getuIdfriend);
+        // emit(AddFriendsLoadingState());
       }
 emit(CheckFollowerSuccessState());
   }
 
+  void checkFollowingPost(
+      String? getuIdfriend,  ) async{
+    
+    // checkfollow = false;
+    final QuerySnapshot resultFollows =
+    await FirebaseFirestore.instance.collection('users').doc(getuIdfriend).collection('followers').where('uId', isEqualTo: 
+    socialUserModel!.uId).get();
+    final List <DocumentSnapshot> documentFollows = resultFollows.docs;
+    if (documentFollows.length > 0 ) { 
+        print('da follow showpostiffollowing la : ' + showpostiffollowing.toString());
+        showpostiffollowing = true;
+      } else {  
+      print('chua follow showpostiffollowing la');
+       showpostiffollowing = false;
+      }
+// emit(CheckFollowerSuccessState());
+  }
+
+    void checkFollowingwithID(
+      String? getuIdMine, 
+      // String? uIdFriend, 
+      String? getuIdfriend, ) async{
+    
+    // checkfollow = false;
+    final QuerySnapshot resultFollows =
+    await FirebaseFirestore.instance.collection('users').doc(getuIdMine).collection('followers').where('uId', isEqualTo: 
+    getuIdfriend).get();
+    print('aaaaaaaaaaaaaaa follow');
+    print(getuIdfriend);
+    print('bbbbbbbbbbbbbbb follow');
+    print(getuIdMine);
+    final List <DocumentSnapshot> documentFollows = resultFollows.docs;
+    if (documentFollows.length > 0 ) { 
+        print('da follow checkfollow la');
+        checkfollow = false;
+        getFollowers(getuIdfriend);
+        print(checkfollow);
+        // emit(UnFriendsSuccessState());
+      } else {  
+      print('chua follow checkfollow la');
+        checkfollow = true;
+        print(checkfollow);
+        getFollowers(getuIdfriend);
+        // emit(AddFriendsLoadingState());
+      }
+emit(CheckFollowerSuccessState());
+  }
+
+   
+
 List<FollowerModel>? followModel = [];
 String? getIDFollow;
-Future<void> Addfollower({SocialUserModel? userModelFriend,String? dateTime}) async{
+Future<void> Addfollower({SocialUserModel? userModelFriend}) async{
     checkfollow = false;
     // getIDFollow = '';
     FollowerModel followModel = FollowerModel(
       uId: socialUserModel!.uId,
       name: socialUserModel!.name,
       image: socialUserModel!.image,
+      date: getDate(),
+      time: DateFormat.jm().format(DateTime.now()),
       dateTime: FieldValue.serverTimestamp());
     FirebaseFirestore.instance
         .collection('users')
@@ -2123,7 +3142,34 @@ Future<void> Addfollower({SocialUserModel? userModelFriend,String? dateTime}) as
         .add(followModel.toMap())
         .then((value) {
         emit(AddFollowerSuccessState());
-        getFollowings(userModelFriend.uId.toString());
+        getFollowers(userModelFriend.uId.toString());
+        }).catchError((error) {
+          
+      if (kDebugMode) {
+        print(error.toString());
+      }
+    
+    });
+  }
+Future<void> AddfollowerwithIDFriend({String? uidFriend}) async{
+    checkfollow = false;
+    // getIDFollow = '';
+    getUserData(uidFriend);
+    FollowerModel followModel = FollowerModel(
+      uId: socialUserModel!.uId,
+      name: socialUserModel!.name,
+      image: socialUserModel!.image,
+      date: getDate(),
+      time: DateFormat.jm().format(DateTime.now()),
+      dateTime: FieldValue.serverTimestamp());
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uidFriend)
+        .collection('followers')
+        .add(followModel.toMap())
+        .then((value) {
+        emit(AddFollowerSuccessState());
+        getFollowers(uidFriend.toString());
         }).catchError((error) {
           
       if (kDebugMode) {
@@ -2142,11 +3188,35 @@ Future<void> Addfollower({SocialUserModel? userModelFriend,String? dateTime}) as
         .then((value) {
       // showToast(text: "Post Deleted", state: ToastStates.ERROR);
       print('da unfollow');
-      emit(UnFollowerSuccessState());
+      // emit(UnFollowerSuccessState());
     });
   }
+    void unFollowingFromPost(String? idMine, String? idFriend) {
+      print(idMine);
+      print('llllllll');
+      print(idFriend);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(idMine).collection('followers').where('uId', isEqualTo: idFriend)
+        .get()
+      .then((QuerySnapshot snapshot) {
+    final docs = snapshot.docs;
+    for (var data in docs) {  
+      print('llllllll');
+      print(data['idFollwer']);
+     FirebaseFirestore.instance
+        .collection('users')
+        .doc(idMine).collection('followers').doc(data['idFollwer'])
+        .delete()
+        .then((value) {
+          print('da unfollow');
+      emit(UnFollowerSuccessState());
+    });
+    }
+      });
+  }
 
-  void getFollowings(String? uIdFriend, ) {
+  void getFollowers(String? uIdFriend, ) {
     // checkfollow = ! checkfollow;
     FirebaseFirestore.instance
         .collection('users').doc(uIdFriend).collection('followers')
@@ -2165,170 +3235,248 @@ Future<void> Addfollower({SocialUserModel? userModelFriend,String? dateTime}) as
           'idFollwer': element.id,
         }));
       });
-      emit(GetFollowerSuccessState());
+      // emit(GetFollowerSuccessState());
     });
+  }
+
+  List<FollowerModel>? followingModel = [];
+  String? getIDFollowing;
+  void getFollowerings(String? uId, ) {
+    // checkfollow = ! checkfollow;
+    FirebaseFirestore.instance
+        .collection('users')
+        .orderBy('dateTime', descending: true)
+        .snapshots()
+        .listen((event) async {
+      followingModel=[];
+      event.docs.forEach((element) async {
+        FirebaseFirestore.instance.collection('users')
+      .doc(element.id).collection('followers')
+      .get()
+      .then((QuerySnapshot snapshot) {
+          final docs = snapshot.docs;
+    for (var data in docs) {  
+        if(data['uId'] == uId){
+      var map = Map<String, dynamic>.from(data.data() as Map<dynamic, dynamic>);
+      print(map);
+      // subpostVideos = [];
+      
+      followingModel!.add(FollowerModel.fromJson(map));
+      }
+    }
+        });
+      });
+      // emit(GetFollowerSuccessState());
+    });
+
 
   }
 
 
 
  ////////////// ADD FRIEND FROM FRIEND
-    bool checkfriend = false;
-    bool checkme = false;
-    String? accept;
-    bool showbuttonAddFriend = false;
-    String?  checkRequirer;
-    void checkREQUIREDFRIEND(
+   void acceptFRIEND(SocialUserModel? userModelFriend, String? uIdFriend, ) async{
+     
+
+   if(checkWaitingAccept == true){
+    
+   checkRequired = true;
+    checkFriendBoth = true;
+    checkfollow = false;
+    checkWaitingAccept = false;
+     print('============================userModelFriend====================================');
+      // print(getsocialUserModelfromFriend!.uId);
+      // print(getsocialUserModelfromFriend!.name);
+      print('checkRequired' + checkRequired!.toString());
+      print('checkFriendBoth' + checkFriendBoth!.toString());
+      print('checkfollow' + checkfollow!.toString());
+      print('checkWaitingAccept' + checkWaitingAccept!.toString());
+
+      /// them follow tu phia toi
+    //       await FirebaseFirestore.instance
+    //     .collection('users').doc(uIdFriend)
+    //     .snapshots()
+    //     .listen((event) async {
+    // emit(SocialGetUserFriendLoadingState());
+    //   getsocialUserModelfromFriend=null;
+    //   getsocialUserModelfromFriend = (SocialUserModel.fromJson(event.data()));
+    FollowerModel addfriendMeFollowModel1 = FollowerModel(
+      uId: socialUserModel!.uId,
+      name: socialUserModel!.name,
+      image: socialUserModel!.image,
+      dateTime: FieldValue.serverTimestamp(),
+      date: getDate(),
+      time: DateFormat.jm().format(DateTime.now()),
+      );
+     
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userModelFriend!.uId)
+        .collection('followers')
+        .add(addfriendMeFollowModel1.toMap())
+        .then((value) {
+        emit(AddFollowerSuccessState());
+        print('============================them follow tu phia toi====================================');
+        getFollowers(userModelFriend!.uId.toString());
+        print('===== checkfollow la: ' + checkfollow.toString());
+        }).catchError((error) {
+          
+      if (kDebugMode) {
+        print(error.toString());
+      }
+    });
+
+  
+      
+      emit(SocialGetUserFriendSuccessState());
+
+    // });
+
+    // accept tu phia toi
+    await FirebaseFirestore.instance.collection('users')
+      .doc(socialUserModel!.uId).collection('friends')
+      .get()
+      .then((QuerySnapshot snapshot) async{
+    final docs = snapshot.docs;
+    for (var data in docs) {  
+   
+       if(data['uId'] == uIdFriend){
+        await FirebaseFirestore.instance.collection('users').doc(socialUserModel!.uId).collection('friends').doc(data['idFriend'])
+            .update(({
+          'accepted': 'yes',
+          'date': getDate(),
+          'time': DateFormat.jm().format(DateTime.now()),
+        }));
+       }
+    }
+    
+
+    emit(GetFriendsSuccessState());
+    getUserDataFriend(uIdFriend); 
+  });
+  
+    ///// accept tu phia ban minh
+     await FirebaseFirestore.instance.collection('users')
+      .doc(uIdFriend).collection('friends')
+      .get()
+      .then((QuerySnapshot snapshot) async{
+    final docs = snapshot.docs;
+    for (var data in docs) {  
+       if(data['uId'] == socialUserModel!.uId){
+        await FirebaseFirestore.instance.collection('users').doc(uIdFriend).collection('friends').doc(data['idFriend'])
+            .update(({
+          'accepted': 'yes',
+          'date': getDate(),
+          'time': DateFormat.jm().format(DateTime.now()),
+        }));
+       }
+   
+    }
+    
+    emit(GetFriendsSuccessState());
+  });
+
+  }
+  }
+
+
+
+    bool? checkWaitingAccept= false;
+    bool? checkRequired = false;
+    bool? checkFriendBoth = false;
+    bool? checkAddFriend = false;
+
+    Future<void> checkREQUIREDFRIEND(
+      context,
       String? getuIdfriend,  
       // String? uIdFriend, 
       SocialUserModel? userModelMine, 
       String? dateTime) async{
-      showbuttonAddFriend = false;
-      // checkme = false;
-      // checkfriend = false;
-      accept = '';
-      checkRequirer = '';
-      
 
+    //     FirebaseFirestore.instance
+    //     .collection('users')
+    //     .doc('OCvamnOfYjfFGvkTbiwtLiJ4Jxw1').collection('friends')
+    //     .doc('NFHBJZaJcgzgeBXw5eZY')
+    //     .delete()
+    //     .then((value) {
+    //   emit(DeleteSubPostSuccessState());
+    // });
+      
+        SocialCubit.get(context).getUserDataFriend(getuIdfriend);
+       /// check da add friend chua
+      final QuerySnapshot checkresultFriend =
+    await FirebaseFirestore.instance.collection('users').doc(socialUserModel!.uId).collection('friends').where('uId', isEqualTo: 
+    getuIdfriend).get();
+    final List <DocumentSnapshot> documentFollows = checkresultFriend.docs;
+    checkAddFriend = false;
     
-    // check friend = false
-       //// check da gui loi moi ket ban chua
-    await FirebaseFirestore.instance.collection('users')
-      .doc(socialUserModel!.uId).collection('friends')
-      .get()
+    if (documentFollows.length > 0 ) { 
+        checkAddFriend = true;
+    }
+    else{
+      checkAddFriend = false;
+    }
+  
+      /// check friend tu phia toi
+        FirebaseFirestore.instance
+        .collection('users')
+        .doc(socialUserModel!.uId).collection('friends').where('uId', isEqualTo: getuIdfriend)
+        .get()
       .then((QuerySnapshot snapshot) {
+    checkWaitingAccept= false;
+      checkRequired = false;
+    checkFriendBoth = false;
     final docs = snapshot.docs;
     for (var data in docs) {  
-       if(data['uId'] == getuIdfriend){
-            print('minh da ket ban roi nhe hihihihihihih');
-            showbuttonAddFriend = true;
-            print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPaccepted');
-      print(data['accepted']);
-     if(data['accepted'] == null)
-     {
-      accept = 'Waiting';
-      checkRequirer = data['requirer'];
-
-     }
-     else
-     {
-      accept = data['accepted'];
-     }
-       }
-       if(data['uId'] != getuIdfriend){
-        checkme = true;
-      checkfriend = true;
-        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-        print('minh chua ket ban dau');
-        print('check friend la      :' + checkfriend.toString());
-        print('check me la      :' + checkme.toString());
-       }
-      
-   
+      print('1111111111111111111111111111111111111111111111111111111111111');
+      print('data[accepted] là:         ' + data['accepted'].toString());
+      print('data[uId] là:         ' + data['uId'].toString());
+      print('getuIdfriend là:         ' + getuIdfriend.toString());
+      if(data['accepted'] == 'no'){
+          checkWaitingAccept = true;
+      }
+      if(data['accepted'] == 'yes'){
+         checkFriendBoth = true;
+         checkfollow = false;
+      }
+      if(data['requirer'] ==  null){
+         checkRequired = false;
+      }
+      if(data['requirer'] ==  'yes'){
+         checkRequired = true;
+      }
     }
-    emit(CheckAcceptSuccessState());
-  });
-   
-        print('FEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
-        print(checkRequirer);
+    emit(CheckFriendsuccessState());
+      });
+    
+     print('00000000000000000000000000000000000000000000000000000000000000000');
+     print('checkWaitingAccept là:         ' + checkWaitingAccept.toString());
+     print('checkFriendBoth là:         ' + checkFriendBoth.toString());
+     print('checkRequired là:         ' + checkRequired.toString());
+     print('00000000000000000000000000000000000000000000000000000000000000000');
+    
 
-    /// check da la ban hay chua phia toi
-    final QuerySnapshot resultFriendPhiaMinh =
-    await FirebaseFirestore.instance.collection('users').doc(userModelMine!.uId).collection('friends').where('uId', isEqualTo: 
-    getuIdfriend).get();
-    final List <DocumentSnapshot> documentFriendsme = resultFriendPhiaMinh.docs;
-    print('88888888888888888888888888888888888888888888888888888888888888');
-    print(accept);
-    print(documentFriendsme.length);
-     if (documentFriendsme.length <= 0){  
-      print('toi chua add friend la');
-        checkme = true;
-        print(checkme);
-        print(accept);
-        getFRIEND(getuIdfriend);
-        emit(GetFriendsSuccessState());
-        // emit(AddFriendsLoadingState());
-      }
-    if ((documentFriendsme.length > 0) && (accept == 'Waiting') ) { 
-        print('cho chap nhan ket ban, set check friend la');
-        checkme = false;
-        getFRIEND(getuIdfriend);
-        // acceptFRIEND(getuIdfriend);
-        print(checkme);
-        emit(GetFriendsSuccessState());
-        // emit(UnFriendsSuccessState());
-      } 
-      if ((documentFriendsme.length > 0) && (accept == 'yes') ) { 
-        print('ca 2 da la ban');
-        checkme = false;
-        showbuttonAddFriend = true;
-        // getFRIEND(getuIdfriend);
-        // acceptFRIEND(getuIdfriend);
-        print(checkme);
-        print(showbuttonAddFriend);
-        emit(GetFriendsSuccessState());
-        // emit(UnFriendsSuccessState());
-      }
-      
-
-
-      /////// check da la ban hay chua phia friend
-    final QuerySnapshot resultFriend =
-    await FirebaseFirestore.instance.collection('users').doc(getuIdfriend).collection('friends').where('uId', isEqualTo: 
-    getuIdfriend).get();
-    final List <DocumentSnapshot> documentFriends = resultFriendPhiaMinh.docs;
-    if (documentFriends.length <= 0){ 
-      print('ban toi chua add friend la');
-        checkfriend = true;
-        print(checkfriend);
-        print(accept);
-        getFRIEND(getuIdfriend);
-        emit(GetFriendsSuccessState());
-        // emit(AddFriendsLoadingState());
-      }
-    if ((documentFriends.length > 0) && (accept == 'Waiting') ) { 
-        print('cho chap nhan ket ban tu phia friend, set check friend la');
-        checkfriend = false;
-        getFRIEND(getuIdfriend);
-        // acceptFRIEND(getuIdfriend);
-        print(checkfriend);
-        emit(GetFriendsSuccessState());
-        // emit(UnFriendsSuccessState());
-      } 
-      if ((documentFriends.length > 0) && (accept == 'yes') ) { 
-        print('cho chap nhan ket ban, set check friend la');
-        checkfriend = false;
-        getFRIEND(getuIdfriend);
-        // acceptFRIEND(getuIdfriend);
-        // print(bothFriend);
-        emit(GetFriendsSuccessState());
-        // emit(UnFriendsSuccessState());
-      }
-      
-
-      // if(checkfriend && checkme){
-      //   bothFriend = true;
-      // }
-      //   {
-      //     bothFriend = false;
-      //   }
   }
 
 List<FriendsModel>? friendModel = [];
 String? getIDFriend;
-Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime}) async{
-    checkfriend = false;
-    checkme = false;
-    showbuttonAddFriend = true;
-    checkRequirer = 'yes';
-    // getIDFollow = '';
-
+Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime,}) async{
+    if(checkWaitingAccept == false){ 
     /// them friend tu phia ban
+    checkAddFriend = true;
+    checkWaitingAccept = true;
+    checkRequired = true;
+    checkfollow = false;
     FriendsModel friendModel = FriendsModel(
+      accepted: "no",
       uId: socialUserModel!.uId,
       name: socialUserModel!.name,
       image: socialUserModel!.image,
-      dateTime: FieldValue.serverTimestamp());
+      dateTime: FieldValue.serverTimestamp(),
+      date: getDate(),
+      time: DateFormat.jm().format(DateTime.now()),
+      );
+      
       print(userModelFriend!.uId);
     FirebaseFirestore.instance
         .collection('users')
@@ -2337,6 +3485,7 @@ Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime}) asyn
         .add(friendModel.toMap())
         .then((value) {
         emit(AddFriendsSuccessState());
+        print('============================them friend tu phia ban====================================');
         getFRIEND(userModelFriend.uId.toString());
         }).catchError((error) {
           
@@ -2345,11 +3494,42 @@ Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime}) asyn
       }
     });
 
-    /// them friend tu phia toi
-    FriendsModel friendModelMe = FriendsModel(
-      uId: userModelFriend.uId,
+    /// them follow tu phia ban
+    FollowerModel addfriendFollowModel = FollowerModel(
+      uId: socialUserModel!.uId,
       name: socialUserModel!.name,
       image: socialUserModel!.image,
+      dateTime: FieldValue.serverTimestamp(),
+      date: getDate(),
+      time: DateFormat.jm().format(DateTime.now()),
+      );
+      
+      print(userModelFriend!.uId);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userModelFriend.uId)
+        .collection('followers')
+        .add(addfriendFollowModel.toMap())
+        .then((value) {
+        emit(AddFollowerSuccessState());
+        print('============================them follow tu phia ban====================================');
+        getFollowers(userModelFriend.uId.toString());
+        }).catchError((error) {
+          
+      if (kDebugMode) {
+        print(error.toString());
+      }
+    });
+
+ 
+    
+
+    /// them friend tu phia toi
+    FriendsModel friendModelMe = FriendsModel(
+      accepted: "no",
+      uId: userModelFriend.uId,
+      name: userModelFriend.name,
+      image: userModelFriend.image,
       requirer: 'yes',
       dateTime: FieldValue.serverTimestamp());
       print(socialUserModel!.uId);
@@ -2360,6 +3540,7 @@ Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime}) asyn
         .add(friendModelMe.toMap())
         .then((value) {
         emit(AddFriendsSuccessState());
+        print('============================them friend tu phia friend====================================');
         getFRIENDfromme();
         }).catchError((error) {
           
@@ -2367,85 +3548,104 @@ Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime}) asyn
         print(error.toString());
       }
     });
+
+   
+
+
+    }
   }
 
   
 
     String? getidCollectionFriend;
     void unFRIEND(String? idUserFriend,) async{
-      checkfriend = true;
-      checkme = true;
-      showbuttonAddFriend = false;
-      getidCollectionFriend = '';
+       checkAddFriend = false;
+    checkWaitingAccept = false;
+    checkfollow = true;
+    checkRequired = true;
+    checkFriendBoth = false;
+      // if(checkFriendBoth == true){
 
-      ////// get idFriendCollention phia ban
-      String? getfieldidFriendtuphiaban;
-    await FirebaseFirestore.instance.collection('users')
-      .doc(idUserFriend).collection('friends').where('uId', isEqualTo: socialUserModel!.uId)
-      .get()
-      .then((QuerySnapshot snapshot) {
-    final docs = snapshot.docs;
-    for (var data in docs) {  
-      
-      print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP-----------------');
-      print(data['idFriend']);
-     if(data['idFriend'] == null)
-     {
-      getfieldidFriendtuphiaban = '';
-     }
-     else
-     {
-      getfieldidFriendtuphiaban = data['idFriend'];
-     }
-    }
-      });
-
-    ////// get idFriendCollention phia toi
-    String? getfieldidFriendtuphiatoi;
-    await FirebaseFirestore.instance.collection('users')
-      .doc(socialUserModel!.uId).collection('friends').where('uId', isEqualTo: idUserFriend)
-      .get()
-      .then((QuerySnapshot snapshot) {
-    final docs = snapshot.docs;
-    for (var data in docs) {  
-      
-      print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP-----------------');
-      print(data['idFriend']);
-     if(data['idFriend'] == null)
-     {
-      getfieldidFriendtuphiatoi = '';
-     }
-     else
-     {
-      getfieldidFriendtuphiatoi = data['idFriend'];
-     }
-    }
-      });
-
-      print('getfieldidFriendtuphiatoi');
-      print(getfieldidFriendtuphiatoi);
+      ////// unfriend phia ban
       FirebaseFirestore.instance
         .collection('users')
-        .doc(socialUserModel!.uId).collection('friends').doc(getfieldidFriendtuphiatoi)
-        .delete()
-        .then((value) {
-      // showToast(text: "Post Deleted", state: ToastStates.ERROR);
-      print('da unfollow tu phia toi');
-      emit(UnFriendsSuccessState());
-    });
-
-    print('getfieldidFriendtuphiaban');
-      print(getfieldidFriendtuphiaban);
-    FirebaseFirestore.instance
+        .doc(socialUserModel!.uId).collection('friends').where('uId', isEqualTo: idUserFriend)
+        .get()
+      .then((QuerySnapshot snapshot) {
+    final docs = snapshot.docs;
+    for (var data in docs) {  
+     FirebaseFirestore.instance
         .collection('users')
-        .doc(idUserFriend).collection('friends').doc(getfieldidFriendtuphiaban)
+        .doc(socialUserModel!.uId).collection('friends').doc(data['idFriend'])
         .delete()
         .then((value) {
-      // showToast(text: "Post Deleted", state: ToastStates.ERROR);
-      print('da unfollow tu phia ban be');
-      emit(UnFriendsSuccessState());
+          print('da unfriend tu phia toi');
+      // emit(UnFriendsSuccessState());
     });
-  
+    }
+      });
+
+      // unfriend from friend
+         FirebaseFirestore.instance
+        .collection('users')
+        .doc(idUserFriend).collection('friends').where('uId', isEqualTo: socialUserModel!.uId)
+        .get()
+      .then((QuerySnapshot snapshot) {
+    final docs = snapshot.docs;
+    for (var data in docs) {  
+     FirebaseFirestore.instance
+        .collection('users')
+        .doc(idUserFriend).collection('friends').doc(data['idFriend'])
+        .delete()
+        .then((value) {
+          print('da unfriend tu phia friend');
+      // emit(UnFriendsSuccessState());
+    });
+    }
+      });
+
+      emit(UnFriendsSuccessState());
+
+          // unfollow from me
+         FirebaseFirestore.instance
+        .collection('users')
+        .doc(socialUserModel!.uId).collection('followers').where('uId', isEqualTo: idUserFriend)
+        .get()
+      .then((QuerySnapshot snapshot) {
+    final docs = snapshot.docs;
+    for (var data in docs) {  
+     FirebaseFirestore.instance
+        .collection('users')
+        .doc(socialUserModel!.uId).collection('followers').doc(data['idFollwer'])
+        .delete()
+        .then((value) {
+          print('da unfollow tu phia toi');
+      // emit(UnFollowerSuccessState());
+    });
+    }
+      });
+
+       // unfollow from friend
+         FirebaseFirestore.instance
+        .collection('users')
+        .doc(idUserFriend).collection('followers').where('uId', isEqualTo: socialUserModel!.uId)
+        .get()
+      .then((QuerySnapshot snapshot) {
+    final docs = snapshot.docs;
+    for (var data in docs) {  
+     FirebaseFirestore.instance
+        .collection('users')
+        .doc(idUserFriend).collection('followers').doc(data['idFollwer'])
+        .delete()
+        .then((value) {
+          print('da unfollow tu phia friend');
+      
+    });
+    }
+      });
+// }  
+   
+    emit(UnFollowerSuccessState());
   }
 
     
@@ -2453,7 +3653,6 @@ Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime}) asyn
     
 
   void getFRIEND(String? uIdFriend, ) {
-    // checkfriend = ! checkfriend;
     FirebaseFirestore.instance
         .collection('users').doc(uIdFriend).collection('friends')
         .orderBy('dateTime', descending: true)
@@ -2464,8 +3663,6 @@ Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime}) asyn
         friendModel!.add(FriendsModel.fromJson(element.data()));
         getIDFriend = '';
         getIDFriend = element.id;
-        // var likes = await element.reference.collection('likes').get();
-        // var comments = await element.reference.collection('comments').get();
         await FirebaseFirestore.instance.collection('users').doc(uIdFriend).collection('friends').doc(element.id)
             .update(({
           'idFriend': element.id,
@@ -2501,78 +3698,30 @@ Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime}) asyn
   }
 
  
-  void acceptFRIEND(String? uIdFriend, ) async{
-    // checkfriend = ! checkfriend;
-    ///// accept tu phia toi
-    ///
-    checkRequirer = '';
-    accept = 'yes';
-    await FirebaseFirestore.instance.collection('users')
-      .doc(socialUserModel!.uId).collection('friends')
-      .get()
-      .then((QuerySnapshot snapshot) async{
-    final docs = snapshot.docs;
-    for (var data in docs) {  
-   
-       if(data['uId'] == uIdFriend){
-        await FirebaseFirestore.instance.collection('users').doc(socialUserModel!.uId).collection('friends').doc(data['idFriend'])
-            .update(({
-          'accepted': 'yes',
-        }));
-       }
-       print('đã ACCEPTED');
-      showbuttonAddFriend = true;
-       print('check nut them nếu true thì ẩn, nếu false thì hiện         :' + showbuttonAddFriend.toString());
-
-    }
-    emit(GetFriendsSuccessState());
-  });
 
 
-   
-
-    ///// accept tu phia ban minh
-     await FirebaseFirestore.instance.collection('users')
-      .doc(uIdFriend).collection('friends')
-      .get()
-      .then((QuerySnapshot snapshot) async{
-    final docs = snapshot.docs;
-    for (var data in docs) {  
-       if(data['uId'] == socialUserModel!.uId){
-        await FirebaseFirestore.instance.collection('users').doc(uIdFriend).collection('friends').doc(data['idFriend'])
-            .update(({
-          'accepted': 'yes',
-        }));
-       }
-   
-    }
-    emit(GetFriendsSuccessState());
-  });
-
-  }
-  void updateFRIEND(String? uIdFriend, ) {
-    // checkfriend = ! checkfriend;
-    FirebaseFirestore.instance
-        .collection('users').doc(uIdFriend).collection('friends')
-        .orderBy('dateTime', descending: true)
-        .snapshots()
-        .listen((event) async {
-      friendModel=[];
-      event.docs.forEach((element) async {
-        friendModel!.add(FriendsModel.fromJson(element.data()));
-        getIDFriend = '';
-        getIDFriend = element.id;
-        // var likes = await element.reference.collection('likes').get();
-        // var comments = await element.reference.collection('comments').get();
-        await FirebaseFirestore.instance.collection('users').doc(uIdFriend).collection('friends').doc(element.id)
-            .update(({
-          'accepred': 'yes',
-        }));
-      });
-      emit(GetFriendsSuccessState());
-    });
-
-  }
+  // void updateFRIEND(String? uIdFriend, ) {
+  //   // checkfriend = ! checkfriend;
+  //   FirebaseFirestore.instance
+  //       .collection('users').doc(uIdFriend).collection('friends')
+  //       .orderBy('dateTime', descending: true)
+  //       .snapshots()
+  //       .listen((event) async {
+  //     friendModel=[];
+  //     event.docs.forEach((element) async {
+  //       friendModel!.add(FriendsModel.fromJson(element.data()));
+  //       getIDFriend = '';
+  //       getIDFriend = element.id;
+  //       // var likes = await element.reference.collection('likes').get();
+  //       // var comments = await element.reference.collection('comments').get();
+  //       await FirebaseFirestore.instance.collection('users').doc(uIdFriend).collection('friends').doc(element.id)
+  //           .update(({
+  //         'accepred': 'yes',
+  //       }));
+  //     });
+  //     emit(GetFriendsSuccessState());
+  //   });
+  // }
 
 
   //// get all 
@@ -2638,7 +3787,7 @@ Future<void> AddFRIEND({SocialUserModel? userModelFriend,String? dateTime}) asyn
   List<PostModelSub> subpostVideos = [];
   List<PostModelSub> subpostVideosPost = [];
   List<PostModelSub> newListVideo = [];
-  Future<void> getAllVideos() 
+  Future<void> getAllVideos(String getuId) 
 async {
   subpostVideos = [];
    await FirebaseFirestore.instance
@@ -2648,19 +3797,24 @@ async {
     final docs = snapshot.docs;
     for (var data in docs) {  
       
-      print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP');
+      print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP Album Image');
       print(data['postImage']);
       // print(data.data());
       // print(data.reference);
       // FirebaseFirestore.instance.collectionGroup('name_of_subcollection').snapshots();
       // subpostVideos.add(PostModelSub.fromJson(data.data()));
-      if( UrlTypeHelper.getType(data['postImage']) == UrlType.VIDEO){
+      
+      if(data['uId'] == getuId)
+      {
+        if( UrlTypeHelper.getType(data['postImage']) == UrlType.VIDEO){
       var map = Map<String, dynamic>.from(data.data() as Map<dynamic, dynamic>);
       print(map);
       // subpostVideos = [];
       
       subpostVideos.add(PostModelSub.fromJson(map));
       }
+      }
+
     }
     emit(SocialGetAllVideoSuccessState());
   });
@@ -2679,12 +3833,15 @@ async {
       // print(data.reference);
       // FirebaseFirestore.instance.collectionGroup('name_of_subcollection').snapshots();
       // subpostVideos.add(PostModelSub.fromJson(data.data()));
+      if(data['uId'] == getuId)
+      {
       if( UrlTypeHelper.getType(data['postImage']) == UrlType.VIDEO){
       var map = Map<String, dynamic>.from(data.data() as Map<dynamic, dynamic>);
       print(map);
       // subpostVideos = [];
       
       subpostVideosPost.add(PostModelSub.fromJson(map));
+      }
       }
     }
     emit(SocialGetAllVideoSuccessState());
@@ -2716,7 +3873,7 @@ void sendPushMessageFriendRequire(String tokenFriend, String title, String body,
           
             "notification": <String, dynamic> {
               "title": title,
-              "body": getiduserModel,
+              "body": body,
               "android_channel_id": "dbfood",
               'idUserFriend': getiduserModel            },
             "to": tokenFriend,
@@ -2730,5 +3887,157 @@ void sendPushMessageFriendRequire(String tokenFriend, String title, String body,
     emit(SendNotifiSuccessState());
   }
 
+
+
+  ///////////////  Save Notification
+  ///
+  ///
+  void AddNotification({
+      String? uIdReciver,
+      String? uIdSender,
+  String? name,
+  String? image,
+  FieldValue? dateTime,
+  String? pageto,
+  String? data1,
+  String? data2,
+  String? data3,
+  String? title,
+  String? body,
+  String? type,
+  String? seen,
+  String? display,
+  }) {
+    NotificationModel notifiModel = NotificationModel(
+      uIdReciver: uIdReciver,
+      uIdSender: uIdSender,
+      name: socialUserModel!.name,
+      queryable: socialUserModel!.name!.toLowerCase(),
+      image: socialUserModel!.image,
+      dateTime: FieldValue.serverTimestamp(),
+      pageto: pageto,
+      data1: data1,
+      data2: data2,
+      data3: data3,
+      title: title,
+      body: body,
+      seen: 'no',
+      type: type,
+      display: 'yes',
+      date: getDate(),
+      time: DateFormat.jm().format(DateTime.now()),
+      );
+    emit(SocialNotificationLoadingState());
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uIdReciver)
+        .collection('notifications')
+        .add(notifiModel.toMap())
+        .then((value) {
+      getPosts();
+      emit(SociallNotificationSuccessState());
+        }).catchError((error) {
+
+      if (kDebugMode) {
+        print(error.toString());
+      }
+      emit(SociallNotificationErrorState(error.toString()));
+    });
+  }
+
+  List<NotificationModel>? listNotification = [];
+  List<NotificationModel>? listNotificationSeenyes = [];
+  List<NotificationModel>? listNotificationSeenno = [];
+    void getNotification(String getuId) {
+    // emit(GetSocialNotificationLoadingState());
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(getuId)
+        .collection("notifications").where('display', isEqualTo: 'yes')
+        // .orderBy('dateTime')
+        .snapshots()
+    .listen((event) {
+      listNotification!.clear();
+      event.docs.forEach((element) {
+       listNotification!.add(NotificationModel.fromJson(element.data()));
+      //  emit(GetSociallNotificationSuccessState());
+      });
+    });
+    }
+
+    void getNotificationAll(String getuId) {
+    // emit(GetSocialNotificationLoadingState());
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(getuId)
+        .collection("notifications")
+        .orderBy('dateTime')
+        .snapshots()
+    .listen((event) {
+      listNotification!.clear();
+      event.docs.forEach((element) {
+       listNotification!.add(NotificationModel.fromJson(element.data()));
+       emit(GetSociallNotificationSuccessState());
+      });
+    });
+    }
+
+    void getNotificationwithSeenisYes(String getuId) {
+    // emit(GetSocialNotificationLoadingState());
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(getuId)
+        .collection("notifications").where('seen', isEqualTo: 'yes')
+        .orderBy('dateTime')
+        .snapshots()
+    .listen((event) {
+      listNotificationSeenyes!.clear();
+      event.docs.forEach((element) {
+       listNotificationSeenyes!.add(NotificationModel.fromJson(element.data()));
+      //  emit(GetSociallNotificationSuccessState());
+      });
+    });
+    }
+
+    void getNotificationwithSeenisNo(String getuId) {
+    // emit(GetSocialNotificationLoadingState());
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(getuId)
+        .collection("notifications").where('seen', isEqualTo: 'no')
+        .orderBy('dateTime')
+        .snapshots()
+    .listen((event) {
+      listNotificationSeenno!.clear();
+      event.docs.forEach((element) {
+       listNotificationSeenno!.add(NotificationModel.fromJson(element.data()));
+      //  emit(GetSociallNotificationSuccessState());
+      });
+    });
+    }
+
+  void updateNotification(String getuId)async{
+     FirebaseFirestore.instance.collection('users').doc(getuId).collection('notifications').where('display', isEqualTo: 'yes').orderBy('dateTime').snapshots().listen((event) {
+      event.docs.forEach((element) async{
+        await FirebaseFirestore.instance.collection('users').doc(getuId).collection('notifications').doc(element.id)
+            .update(({
+          // 'display': 'no',
+          'iDNotification': element.id.toString()
+        }));
+      //  listNotification!.add(NotificationModel.fromJson(element.data()));
+       emit(UpdateSociallNotificationSuccessState());
+      });
+    });
+
+  }
+  void updateNotificationItem(String getuId, String idNotification)async{
+    
+        await FirebaseFirestore.instance.collection('users').doc(getuId).collection('notifications').doc(idNotification)
+            .update(({
+          'display': 'no',
+          'seen': 'yes',
+        }));
+        emit(UpdateSociallNotificationSuccessState());
+  }
 
 }

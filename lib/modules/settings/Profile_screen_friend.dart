@@ -7,8 +7,8 @@ import 'package:socialapp/layout/button/buttonanimationCancelReuire.dart';
 import 'package:socialapp/layout/socialapp/sociallayout.dart';
 import 'package:socialapp/modules/CommentsScreenAlbum.dart';
 import 'package:socialapp/modules/feeds/feedDetail.dart';
-import 'package:socialapp/modules/new_post/new_post_personal.dart';
-import 'package:socialapp/modules/search/searchFriend.dart';
+import 'package:socialapp/modules/new_post/new_post_album.dart';
+// import 'package:socialapp/modules/search/searchFriend.dart';
 
 import '../../../layout/socialapp/cubit/cubit.dart';
 import '../../../layout/socialapp/cubit/state.dart';
@@ -18,6 +18,7 @@ import '../../../shared/styles/iconbroken.dart';
 import '../edit_profile/edit_ProfileScreen.dart';
 import './photos_videos.dart';
 import 'package:socialapp/layout/button/buttonanimationRequireFriend.dart';
+import 'package:socialapp/layout/button/buttonanimationUnFollow.dart';
 import 'package:socialapp/layout/button/buttonanimationFollow.dart';
 import 'package:socialapp/models/social_model/post_model.dart';
 import 'package:socialapp/models/social_model/post_model_sub.dart';
@@ -42,21 +43,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:readmore/readmore.dart';
+import 'package:expandable/expandable.dart';
 
 
 
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-      print("onBackgroundMessage: $message");
-    }
-    
+
 
 
 class ProfileScreenFriend extends StatefulWidget {
-  SocialUserModel? getuserModelFriend;
+  // SocialUserModel? getuserModelFriend;
   String? userId; 
   
-  ProfileScreenFriend({Key? key, this.getuserModelFriend, this.userId}) : super(key: key);
+  ProfileScreenFriend({Key? key, this.userId}) : super(key: key);
 
   @override
   State<ProfileScreenFriend> createState() => _ProfileScreenFriendState();
@@ -65,26 +65,6 @@ class ProfileScreenFriend extends StatefulWidget {
 class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
 
 
-  //  @override
-  //     void initState() {
-  //       super.initState();
-    
-  //   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  //   FirebaseMessaging.onMessage.listen(
-  //     (RemoteMessage message) async {
-  //       print("onMessage: $message");
-  //   });
-  //   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-  //       print("onMessageOpenedApp: $message");
-            
-  //               navigateTo(context, SearchFriendPage()); 
-  //       //   if (message.data["navigation"] == "/your_route") {
-  //       //     int _yourId = int.tryParse(message.data["id"]) ?? 0;
-  //       //     navigateTo(context, SearchFriendPage());
-  //       // }
-  //     });
-  //     }
-    
 
 
 
@@ -92,48 +72,52 @@ class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
   Widget build(BuildContext context) {
     bool loadingne = false;
      var scaffoldKey = GlobalKey<ScaffoldState>();
-     
-     print('check da truyen user hay chua');
-    //  print(widget.getuserModelFriend!.uId.toString());
-     print('check truyen id user bang thong bao');
-    //  print(widget.userId!.toString());
-     print('check nut add friend');
-     print(SocialCubit.get(context).showbuttonAddFriend);
-
-     print('check nut check friend');
-     print(SocialCubit.get(context).checkfriend);
-     print('check check me');
-     print(SocialCubit.get(context).checkme);
+    
     return Builder(
       builder: (context) {
-        print('TRƯỚC KHI SET NULL');
-        print(widget.userId);
-        print('------------------');
-        if(widget.getuserModelFriend == null){
-         SocialCubit.get(context).getUserDataFriend(widget.userId!);
-          widget.getuserModelFriend = SocialCubit.get(context).socialUserModelFriend;
-         print('SAU KHI SET NULL');
-        // print(widget.getuserModelFriend!.uId);
+          
+            
+         SocialCubit.get(context).checkREQUIREDFRIEND(context, widget.userId, SocialCubit.get(context).
+         socialUserModel!, DateFormat.jm().format(DateTime.now()),);
+         SocialCubit.get(context).getUserDataFriend(widget.userId);
+          var userModel = SocialCubit.get(context).getsocialUserModelFriend;
          
-        // Future.delayed(Duration(seconds: 10), () {
-        
-            SocialCubit.get(context).getPostsFriend(widget.getuserModelFriend!.uId.toString());
-        SocialCubit.get(context).checkFollowing(widget.getuserModelFriend!.uId, SocialCubit.get(context).socialUserModel!, DateFormat.jm().format(DateTime.now()),);
-         SocialCubit.get(context).checkREQUIREDFRIEND(widget.getuserModelFriend!.uId, SocialCubit.get(context).socialUserModel!, DateFormat.jm().format(DateTime.now()),);
-         SocialCubit.get(context).getFollowings(widget.getuserModelFriend!.uId);
-         SocialCubit.get(context).getFRIEND(widget.getuserModelFriend!.uId);
-        //  });
+        Future.delayed(Duration(seconds: 4), () {
+          print('------------checkREQUIREDFRIEND--------------');
        
-        }
-        else{
-        SocialCubit.get(context).getUserData(widget.getuserModelFriend!.uId.toString());    
-        SocialCubit.get(context).getPostsFriend(widget.getuserModelFriend!.uId.toString());
-        SocialCubit.get(context).checkFollowing(widget.getuserModelFriend!.uId, SocialCubit.get(context).socialUserModel!, DateFormat.jm().format(DateTime.now()),);
-         SocialCubit.get(context).checkREQUIREDFRIEND(widget.getuserModelFriend!.uId, SocialCubit.get(context).socialUserModel!, DateFormat.jm().format(DateTime.now()),);
-         SocialCubit.get(context).getFollowings(widget.getuserModelFriend!.uId);
-         SocialCubit.get(context).getFRIEND(widget.getuserModelFriend!.uId);
-        }
+       
+        userModel = SocialCubit.get(context).getsocialUserModelFriend;
+        print('------------checkAddFriend--------------');
+        print(SocialCubit.get(context).checkAddFriend);
+        print('------------checkWaitingAccept--------------');
+        print(SocialCubit.get(context).checkWaitingAccept);
+        print('------------checkFriendBoth--------------');
+        print(SocialCubit.get(context).checkFriendBoth);
+        print('------------checkRequired--------------');
+        print(SocialCubit.get(context).checkRequired);
+        print('---------------------------------------');
+        print('------------getPostsFriend--------------');
+        SocialCubit.get(context).getPostsFriend(userModel!.uId);
+        print('posts1 là : ' + SocialCubit.get(context).posts1.length.toString());
+        print('------------checkFollowing--------------');
+        SocialCubit.get(context).checkFollowing(userModel!.uId, SocialCubit.get(context).socialUserModel!, );
          
+         
+         print('checkAddFriend là : ' + SocialCubit.get(context).checkAddFriend.toString());
+         print('checkWaitingAccept là : ' + SocialCubit.get(context).checkWaitingAccept.toString());
+         print('checkFriendBoth là : ' + SocialCubit.get(context).checkFriendBoth.toString());
+
+         print('------------getFollowers--------------');
+         SocialCubit.get(context).getFollowers(userModel!.uId);
+         print('------------getFollowerings--------------');
+         SocialCubit.get(context).getFollowerings(userModel!.uId);
+         print('------------getFRIEND--------------');
+         SocialCubit.get(context).getFRIEND(userModel!.uId);
+         print('------------ket thuc build ban dau--------------');
+         });
+       
+        
+   
 
         return BlocConsumer<SocialCubit, SocialStates>(
           listener: (context,state){
@@ -147,10 +131,12 @@ class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
               var socialUserModelMine = SocialCubit.get(context).socialUserModel;
               var profileImage = SocialCubit.get(context).profileImage;
               var coverImage = SocialCubit.get(context).coverImage;
+              SocialCubit.get(context).getFollowers(socialUserModelMine!.uId);
               return ConditionalBuilder(
                  condition: 
+                 
                  SocialCubit.get(context).posts1.isNotEmpty &&
-                  widget.getuserModelFriend != null,
+                  userModel!= null,
               builder: (context) =>
                MaterialApp(
                     debugShowCheckedModeBanner: false,
@@ -164,224 +150,255 @@ class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
             ],
           ),
          
-                   body: SingleChildScrollView(
+                   body: 
+                   SingleChildScrollView(
                       physics: BouncingScrollPhysics(),
                       child: Padding(
                         padding: const EdgeInsets.all(8),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 180,
-                              child: Stack(
-                                alignment: AlignmentDirectional.bottomCenter,
-                                children: [
-                                  Align(
-                                    child: Container(
-                                      height: 140,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(topLeft:Radius.circular(4),topRight:Radius.circular(4) ),
-                                          image: DecorationImage(
-                                              image: NetworkImage(
-                                                  '${widget.getuserModelFriend!.cover}'),
-                                              fit: BoxFit.cover)),
+                        child: Container(
+                            // height: setheight,
+                    width: setWidth -20,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 180,
+                                child: Stack(
+                                  alignment: AlignmentDirectional.bottomCenter,
+                                  children: [
+                                    Align(
+                                      child: Container(
+                                        height: 140,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.only(topLeft:Radius.circular(4),topRight:Radius.circular(4) ),
+                                            image: DecorationImage(
+                                                image: NetworkImage(
+                                                    '${userModel!.cover}'),
+                                                fit: BoxFit.cover)),
+                                      ),
+                                      alignment: AlignmentDirectional.topCenter,
                                     ),
-                                    alignment: AlignmentDirectional.topCenter,
-                                  ),
-                                  CircleAvatar(
-                                    radius: 64,
-                                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                                    child: CircleAvatar(
-                                      radius: 60,
-                                      backgroundImage: NetworkImage(
-                                          '${widget.getuserModelFriend!.image}'),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 5,),
-                            Text(
-                              '${widget.getuserModelFriend!.name}',
-                              style:Theme.of(context).textTheme.bodyText1,
-                            ),
-                            Text(
-                              '${widget.getuserModelFriend!.bio}',
-                              style:Theme.of(context).textTheme.caption,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 20.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '100',
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          ),
-                                          Text(
-                                            'Posts',
-                                            style: Theme.of(context).textTheme.caption,
-                                          ),
-                                        ],
-                               
+                                    CircleAvatar(
+                                      radius: 64,
+                                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                                      child: CircleAvatar(
+                                        radius: 60,
+                                        backgroundImage: NetworkImage(
+                                            '${userModel!.image}'),
                                       ),
                                     ),
-                                  ),
-                               
-                                  Expanded(
-                                    child: Container(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '265',
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          ),
-                                          Text(
-                                            'Photos',
-                                            style: Theme.of(context).textTheme.caption,
-                                          ),
-                                        ],
-                               
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '10K',
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          ),
-                                          Text(
-                                            'Followers',
-                                            style: Theme.of(context).textTheme.caption,
-                                          ),
-                                        ],
-                               
-                                      ),
-                                      onTap: (){},
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '103',
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          ),
-                                          Text(
-                                            'Followings',
-                                            style: Theme.of(context).textTheme.caption,
-                                          ),
-                                        ],
-                               
-                                      ),
-                                      onTap: (){},
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Row(
-                              children: [ 
-                                ((SocialCubit.get(context).showbuttonAddFriend == false ))?
-                                Expanded(child: buttonanimationRequireFriend(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,),)
-                                :
-                                Container(),
-                                (((SocialCubit.get(context).checkme == false)&& (SocialCubit.get(context).checkfriend ==false)) && (SocialCubit.get(context).accept == 'yes' )) ?
-                                Expanded(child: buttonanimationUnFriend(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,),)
-                                :
-                                Container(),
-                                (((SocialCubit.get(context).checkme == false)&& (SocialCubit.get(context).checkfriend ==false)) && (SocialCubit.get(context).checkRequirer == null )) ?
-                                Expanded(child: buttonanimationRequireAccept(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,),)
-                                :
-                                Container(),
-                                ((((SocialCubit.get(context).checkme == false)&& (SocialCubit.get(context).checkfriend ==false)) && (SocialCubit.get(context).checkRequirer == 'yes' ))
-                                ||
-                                (((SocialCubit.get(context).checkme == false)&& (SocialCubit.get(context).checkfriend ==false)) && (SocialCubit.get(context).checkRequirer == null ))
-                                 ) ?
-                                Expanded(child: buttonanimationCancelRequire(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,),)
-                                :
-                                Container(),
-                                Expanded(child: buttonanimationFollow(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,)),
-                              ],
-                            ),
-                            SizedBox(height: 20,),
-                            Column(
-                               
-                              children: [
-                               
-                                /////// what is in your
-                                Container(
-                                  padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
-                                  decoration: BoxDecoration(
-                                  color: Colors.white,
-                                                              borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(10),
-                                      topRight: Radius.circular(10),
-                                      bottomLeft: Radius.circular(10),
-                                      bottomRight: Radius.circular(10)
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 5,
-                                      blurRadius: 7,
-                                      offset: Offset(0, 3), // changes position of shadow
-                                    ),
-                     ],
-                                  ),
-                                  child: Row(
-                                                            children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      navigateTo(context,SocialLayout(4));
-                                    },
-                                    child: CircleAvatar(
-                                        radius: 22,
-                                        backgroundImage:
-                                        NetworkImage(socialUserModelMine.image.toString())),
-                                  ),
-                                
-                                  TextButton(
-                                    onPressed: () {
-                                      navigateTo(context, NewPostPersonalScreen());
-                                    },
-                                    child: SizedBox(
-                                      // width: 100,
-                                      child: Text("What is in your mind ...",
-                                        style: const TextStyle(color: Colors.grey),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                    ),
-                                  ),
-                                                            ],
-                                                          ),
+                                  ],
                                 ),
-                                
-                                  SizedBox(height: 30,),
-                                ////// post of persion
-                                Container(
-                                  child:  ListView.separated(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) => buildPost(SocialCubit.get(context).posts1[index],widget.getuserModelFriend!,context, index,scaffoldKey, SocialCubit.get(context).posts1[index].albumImages),
-                            separatorBuilder: (context, index) => SizedBox(
-                            height: 8,
+                              ),
+                              SizedBox(height: 5,),
+                              Text(
+                                '${userModel!.name}',
+                                style:Theme.of(context).textTheme.bodyText1,
+                              ),
+                              Text(
+                                '${userModel!.bio}',
+                                style:Theme.of(context).textTheme.caption,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              SocialCubit.get(context).posts1.length.toString(),
+                                              // '100',
+                                              style: Theme.of(context).textTheme.subtitle2,
+                                            ),
+                                            Text(
+                                              'Posts',
+                                              style: Theme.of(context).textTheme.caption,
+                                            ),
+                                          ],
+                                 
+                                        ),
+                                      ),
+                                    ),
+                                 
+                                    
+                                    Expanded(
+                                      child: GestureDetector(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              SocialCubit.get(context).followModel!.length.toString(),
+                                              
+                                              style: Theme.of(context).textTheme.subtitle2,
+                                            ),
+                                            Text(
+                                              'Followers',
+                                              style: Theme.of(context).textTheme.caption,
+                                            ),
+                                          ],
+                                 
+                                        ),
+                                        onTap: (){},
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              SocialCubit.get(context).getIDFollowing == null ?
+                                          '0' :
+                                          SocialCubit.get(context).getIDFollowing.toString(),
+                                             
+                                              // '103',
+                                              style: Theme.of(context).textTheme.subtitle2,
+                                            ),
+                                            Text(
+                                              'Followings',
+                                              style: Theme.of(context).textTheme.caption,
+                                            ),
+                                          ],
+                                 
+                                        ),
+                                        onTap: (){},
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  (SocialCubit.get(context).checkAddFriend == false) ?
+                                   Expanded(child: buttonanimationRequireFriend(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,),)
+                                   :
+                                   ((SocialCubit.get(context).checkWaitingAccept == true) && (SocialCubit.get(context).checkRequired == false)) ?
+                                   Row(
+                                     children: [
+                                       Expanded(child: buttonanimationRequireAccept(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,),),
+                                       Expanded(child: buttonanimationCancelRequire(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,),)
+                                     ],
+                                   )
+                                   :
+                                   ((SocialCubit.get(context).checkWaitingAccept == true) && (SocialCubit.get(context).checkRequired == true)) ?
+                                   Expanded(child: buttonanimationCancelRequire(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,),)
+                                   :
+                                   (SocialCubit.get(context).checkFriendBoth == true) ?
+                                   Expanded(child: buttonanimationUnFriend(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,),)
+                                   :
+                                   Container(),
+                                   (SocialCubit.get(context).checkfollow == true) ?
+                                  Expanded(child: buttonanimationFollow(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,))
+                                  :
+                                  Expanded(child: buttonanimationUnFollow(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,)),
+                                ],
+                              ),
+                              SizedBox(height: 20,),
+                               Container(
+                               child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                 mainAxisSize: MainAxisSize.max,
+                                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                                 children: [
+                                                   Expanded(
+                                                     child: TextButton(
+                                                       // onPressed: () {
+                                                       //   // SocialCubit.get(context).getPostImage();
+                                                       //   SocialCubit.get(context).selectImages();
+                                                       // },
+                                                   onPressed: () {
+                                                    SocialCubit.get(context).getUserDataFriend(userModel!.uId);
+                                                    SocialCubit.get(context).getImageDataCubut(userModel!.uId);
+                                                   navigateTo(context, Photos_videos(userModel!.name));
+                                                   },
+                                                       child: Row(
+                                                         mainAxisAlignment: MainAxisAlignment.start,
+                                                         children: const [
+                                Icon(IconBroken.Image),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text('photo / video'),
+                                                         ],
+                                                       ),
+                                                     ),
+                                                   ),
+                                                 ],
+                                               ),
+                             ),
+                               
+                               SizedBox(height: 10,),
+                              Column(
+                                 
+                                children: [
+                                 
+                                  /////// what is in your
+                                  Container(
+                                    padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+                                    decoration: BoxDecoration(
+                                    color: Colors.white,
+                                                                borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                        topRight: Radius.circular(10),
+                                        bottomLeft: Radius.circular(10),
+                                        bottomRight: Radius.circular(10)
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 5,
+                                        blurRadius: 7,
+                                        offset: Offset(0, 3), // changes position of shadow
+                                      ),
+                                             ],
+                                    ),
+                                    child: Row(
+                                                              children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        navigateTo(context,SocialLayout(4));
+                                      },
+                                      child: CircleAvatar(
+                                          radius: 22,
+                                          backgroundImage:
+                                          NetworkImage(socialUserModelMine.image.toString())),
+                                    ),
+                                  
+                                    TextButton(
+                                      onPressed: () {
+                                        navigateTo(context, NewPostPersonalScreen());
+                                      },
+                                      child: SizedBox(
+                                        // width: 100,
+                                        child: Text("What is in your mind ...",
+                                          style: const TextStyle(color: Colors.grey),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                      ),
+                                    ),
+                                                              ],
+                                                            ),
+                                  ),
+                                  
+                                    SizedBox(height: 30,),
+                                  ////// post of persion
+                                  Container(
+                                    child:  ListView.separated(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) => buildPost(SocialCubit.get(context).posts1[index],userModel!,context, index,scaffoldKey, SocialCubit.get(context).posts1[index].albumImages),
+                              separatorBuilder: (context, index) => SizedBox(
+                              height: 8,
+                              ),
+                              itemCount: 
+                              (SocialCubit.get(context).posts1.length)
                             ),
-                            itemCount: 
-                            (SocialCubit.get(context).posts1.length)
+                                  ),
+                                ],
+                              ),
+                                 
+                            ],
                           ),
-                                ),
-                              ],
-                            ),
-                               
-                          ],
                         ),
                       ),
                     ),
@@ -406,213 +423,254 @@ class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
             ],
           ),
          
-                   body: SingleChildScrollView(
+                   body: 
+                    userModel== null ?
+                  Center(child: CircularProgressIndicator(),)
+                  :
+                   SingleChildScrollView(
                       physics: BouncingScrollPhysics(),
                       child: Padding(
                         padding: const EdgeInsets.all(8),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 180,
-                              child: Stack(
-                                alignment: AlignmentDirectional.bottomCenter,
-                                children: [
-                                  Align(
-                                    child: Container(
-                                      height: 140,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(topLeft:Radius.circular(4),topRight:Radius.circular(4) ),
-                                          image: DecorationImage(
-                                              image: NetworkImage(
-                                                  '${widget.getuserModelFriend!.cover}'),
-                                              fit: BoxFit.cover)),
+                        child: Container(
+                            height: setheight - 40,
+                    width: setWidth -20,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 180,
+                                child: Stack(
+                                  alignment: AlignmentDirectional.bottomCenter,
+                                  children: [
+                                    Align(
+                                      child: Container(
+                                        height: 140,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.only(topLeft:Radius.circular(4),topRight:Radius.circular(4) ),
+                                            image: DecorationImage(
+                                                image: NetworkImage(
+                                                    '${userModel!.cover}'),
+                                                fit: BoxFit.cover)),
+                                      ),
+                                      alignment: AlignmentDirectional.topCenter,
                                     ),
-                                    alignment: AlignmentDirectional.topCenter,
-                                  ),
-                                  CircleAvatar(
-                                    radius: 64,
-                                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                                    child: CircleAvatar(
-                                      radius: 60,
-                                      backgroundImage: NetworkImage(
-                                          '${widget.getuserModelFriend!.image}'),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 5,),
-                            Text(
-                              '${widget.getuserModelFriend!.name}',
-                              style:Theme.of(context).textTheme.bodyText1,
-                            ),
-                            Text(
-                              '${widget.getuserModelFriend!.bio}',
-                              style:Theme.of(context).textTheme.caption,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 20.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '100',
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          ),
-                                          Text(
-                                            'Posts',
-                                            style: Theme.of(context).textTheme.caption,
-                                          ),
-                                        ],
-                               
+                                    CircleAvatar(
+                                      radius: 64,
+                                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                                      child: CircleAvatar(
+                                        radius: 60,
+                                        backgroundImage: NetworkImage(
+                                            '${userModel!.image}'),
                                       ),
                                     ),
-                                  ),
-                               
-                                  Expanded(
-                                    child: Container(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '265',
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          ),
-                                          Text(
-                                            'Photos',
-                                            style: Theme.of(context).textTheme.caption,
-                                          ),
-                                        ],
-                               
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '10K',
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          ),
-                                          Text(
-                                            'Followers',
-                                            style: Theme.of(context).textTheme.caption,
-                                          ),
-                                        ],
-                               
-                                      ),
-                                      onTap: (){},
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            '103',
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          ),
-                                          Text(
-                                            'Followings',
-                                            style: Theme.of(context).textTheme.caption,
-                                          ),
-                                        ],
-                               
-                                      ),
-                                      onTap: (){},
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Row(
-                              children: [ 
-                                ((SocialCubit.get(context).showbuttonAddFriend == false ))?
-                                Expanded(child: buttonanimationRequireFriend(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,),)
-                                :
-                                Container(),
-                                (((SocialCubit.get(context).checkme == false)&& (SocialCubit.get(context).checkfriend ==false)) && (SocialCubit.get(context).accept == 'yes' )) ?
-                                Expanded(child: buttonanimationUnFriend(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,),)
-                                :
-                                Container(),
-                                (((SocialCubit.get(context).checkme == false)&& (SocialCubit.get(context).checkfriend ==false)) && (SocialCubit.get(context).checkRequirer == null )) ?
-                                Expanded(child: buttonanimationRequireAccept(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,),)
-                                :
-                                Container(),
-                                ((((SocialCubit.get(context).checkme == false)&& (SocialCubit.get(context).checkfriend ==false)) && (SocialCubit.get(context).checkRequirer == 'yes' ))
-                                ||
-                                (((SocialCubit.get(context).checkme == false)&& (SocialCubit.get(context).checkfriend ==false)) && (SocialCubit.get(context).checkRequirer == null ))
-                                 ) ?
-                                Expanded(child: buttonanimationCancelRequire(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,),)
-                                :
-                                Container(),
-                                Expanded(child: buttonanimationFollow(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: widget.getuserModelFriend,)),
-                              ],
-                            ),
-                            SizedBox(height: 20,),
-                            Column(
-                               
-                              children: [
-                               
-                                /////// what is in your
-                                Container(
-                                  padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
-                                  decoration: BoxDecoration(
-                                  color: Colors.white,
-                                                              borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(10),
-                                      topRight: Radius.circular(10),
-                                      bottomLeft: Radius.circular(10),
-                                      bottomRight: Radius.circular(10)
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 5,
-                                      blurRadius: 7,
-                                      offset: Offset(0, 3), // changes position of shadow
-                                    ),
-                     ],
-                                  ),
-                                  child: Row(
-                                                            children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      navigateTo(context,SocialLayout(4));
-                                    },
-                                    child: CircleAvatar(
-                                        radius: 22,
-                                        backgroundImage:
-                                        NetworkImage(socialUserModelMine.image.toString())),
-                                  ),
-                                
-                                  TextButton(
-                                    onPressed: () {
-                                      navigateTo(context, NewPostPersonalScreen());
-                                    },
-                                    child: SizedBox(
-                                      // width: 100,
-                                      child: Text("What is in your mind ...",
-                                        style: const TextStyle(color: Colors.grey),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                    ),
-                                  ),
-                                                            ],
-                                                          ),
+                                  ],
                                 ),
-                                
-                                  SizedBox(height: 30,),
-                                ////// post of persion
-                               
-                              ],
-                            ),
-                               
-                          ],
+                              ),
+                              SizedBox(height: 5,),
+                              Text(
+                                '${userModel!.name}',
+                                style:Theme.of(context).textTheme.bodyText1,
+                              ),
+                              Text(
+                                '${userModel!.bio}',
+                                style:Theme.of(context).textTheme.caption,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              SocialCubit.get(context).posts1.length.toString(),
+                                              // '100',
+                                              style: Theme.of(context).textTheme.subtitle2,
+                                            ),
+                                            Text(
+                                              'Posts',
+                                              style: Theme.of(context).textTheme.caption,
+                                            ),
+                                          ],
+                                 
+                                        ),
+                                      ),
+                                    ),
+                                 
+                                    
+                                    Expanded(
+                                      child: GestureDetector(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                               SocialCubit.get(context).followModel!.length.toString(),
+                                              
+                                              style: Theme.of(context).textTheme.subtitle2,
+                                            ),
+                                            Text(
+                                              'Followers',
+                                              style: Theme.of(context).textTheme.caption,
+                                            ),
+                                          ],
+                                 
+                                        ),
+                                        onTap: (){},
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              SocialCubit.get(context).getIDFollowing == null ?
+                                          '0' :
+                                          SocialCubit.get(context).getIDFollowing.toString(),
+                                              style: Theme.of(context).textTheme.subtitle2,
+                                            ),
+                                            Text(
+                                              'Followings',
+                                              style: Theme.of(context).textTheme.caption,
+                                            ),
+                                          ],
+                                 
+                                        ),
+                                        onTap: (){},
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                    ((SocialCubit.get(context).checkRequired == false) && (SocialCubit.get(context).checkWaitingAccept == true)) ?
+                                   Expanded(child: buttonanimationRequireAccept(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,))
+                                   :
+                                   Container(),
+
+
+                                  (SocialCubit.get(context).checkAddFriend == false) ?
+                                   Expanded(child: buttonanimationRequireFriend(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,),)
+                                   :
+                                   ((SocialCubit.get(context).checkWaitingAccept == true)) ?
+                                   Expanded(child: buttonanimationCancelRequire(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,))
+                                   :
+                                   ((SocialCubit.get(context).checkWaitingAccept == true) && (SocialCubit.get(context).checkRequired == true)) ?
+                                   Expanded(child: buttonanimationCancelRequire(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,),)
+                                   :
+                                   Container(),
+
+                                   (SocialCubit.get(context).checkFriendBoth == true) ?
+                                   Expanded(child: buttonanimationUnFriend(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,),)
+                                   :
+                                   Container(),
+
+                                 
+
+                                   (SocialCubit.get(context).checkfollow == true) ?
+                                  Expanded(child: buttonanimationFollow(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,))
+                                  :
+                                  (SocialCubit.get(context).checkfollow == false) ?
+                                  Expanded(child: buttonanimationUnFollow(uIdMine: socialUserModelMine!.uId.toString(),getuserModelFriend: userModel!,))
+                                  :
+                                   Container(),
+                                ],
+                              ),
+                              
+                              SizedBox(height: 10,),
+                                Container(
+                               child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                 mainAxisSize: MainAxisSize.max,
+                                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                                 children: [
+                                                   Expanded(
+                                                     child: TextButton(
+                                                       // onPressed: () {
+                                                       //   // SocialCubit.get(context).getPostImage();
+                                                       //   SocialCubit.get(context).selectImages();
+                                                       // },
+                                                   onPressed: () {
+                                                    // SocialCubit.get(context).getUserDataFriend(userModel!.uId);
+                                                    SocialCubit.get(context).getImageDataCubut(userModel!.uId);
+                                                   navigateTo(context, Photos_videos(userModel!.name,));  
+                                                   },
+                                                       child: Row(
+                                                         mainAxisAlignment: MainAxisAlignment.start,
+                                                         children: const [
+                                Icon(IconBroken.Image),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text('photo / video'),
+                                                         ],
+                                                       ),
+                                                     ),
+                                                   ),
+                                                 ],
+                                               ),
+                             ),
+                              SizedBox(height: 20,),
+                              Column(
+                                 
+                                children: [
+                                 
+                                  /////// what is in your
+                                  Container(
+                                    padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+                                    decoration: BoxDecoration(
+                                    color: Colors.white,
+                                                                borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                        topRight: Radius.circular(10),
+                                        bottomLeft: Radius.circular(10),
+                                        bottomRight: Radius.circular(10)
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 5,
+                                        blurRadius: 7,
+                                        offset: Offset(0, 3), // changes position of shadow
+                                      ),
+                                             ],
+                                    ),
+                                    child: Row(
+                                                              children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        navigateTo(context,SocialLayout(4));
+                                      },
+                                      child: CircleAvatar(
+                                          radius: 22,
+                                          backgroundImage:
+                                          NetworkImage(socialUserModelMine.image.toString())),
+                                    ),
+                                  
+                                    TextButton(
+                                      onPressed: () {
+                                        navigateTo(context, NewPostPersonalScreen());
+                                      },
+                                      child: SizedBox(
+                                        // width: 100,
+                                        child: Text("What is in your mind ...",
+                                          style: const TextStyle(color: Colors.grey),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                      ),
+                                    ),
+                                                              ],
+                                                            ),
+                                  ),
+                                  
+                                    SizedBox(height: 30,),
+                                  ////// post of persion
+                                 
+                                ],
+                              ),
+                                 
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -638,7 +696,7 @@ class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
     children: [
       // Text(getuserModel!.uId.toString()),
       // // Text(model.uId.toString()),
-      widget.getuserModelFriend!.uId.toString() == widget.getuserModelFriend!.uId.toString() ?//getsubpost![index].uId.toString() ?
+      userModel!.uId.toString() == userModel!.uId.toString() ?//getsubpost![index].uId.toString() ?
    
    Card(
         clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -647,7 +705,7 @@ class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 13),
           child: 
-           model.uId.toString() == userModel.uId.toString() ?
+           model.uId.toString() == userModel!.uId.toString() ?
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -717,14 +775,15 @@ class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
                 ],
               ),
               myDivider(),
-              model.text != null
-                  ? Text(
-                      '${model.text}',
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    )
-                  : Text('${model.text}', style: TextStyle(fontSize: 20)),
+              model.text != null ?
+                            ReadMoreText(
+                  '${model.text}',
+                  trimLines: 2,
+                  colorClickableText: Colors.pink,
+                  trimMode: TrimMode.Line,
+                  trimCollapsedText: '...Show more',
+                  trimExpandedText: ' show less',
+                ) : Text(''),
               // if (model.subPost.postImage.toString() != null)
                 // Padding(
                 //     padding: const EdgeInsetsDirectional.only(top: 10),
@@ -770,14 +829,14 @@ class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
                 Container(
                    width: MediaQuery.of(context).size.width - 26,
               height: urls.length == 1 ?
-                      280 : 
+                      250 : 
                       urls.length == 2 ?
                       210 :
                       urls.length == 3 ?
                       140 : 
                       urls.length >= 4 ?
                       400 : 0,
-
+color: Color.fromARGB(192, 175, 171, 171),
                   child: 
                   PhotoGrid(
                             imageUrls: urls,
@@ -899,32 +958,31 @@ class _ProfileScreenFriendState extends State<ProfileScreenFriend> {
                       ),
                     ),
                   ),
-                  InkWell(
-                    onTap: () async {
-                      SocialUserModel ? postUser = SocialCubit.get(context).socialUserModel;
-                      await SocialCubit.get(context).likedByMe(
-                          liked: true,
-                          postUser: postUser,
-                          context: context,
-                          postModel: model,
-                          postId: model.postId
-                      );
+                  // InkWell(
+                  //   onTap: () async {
+                  //     SocialUserModel ? postUser = SocialCubit.get(context).socialUserModel;
+                  //     await SocialCubit.get(context).likedByMe(
+                  //         postUser: postUser,
+                  //         context: context,
+                  //         postModel: model,
+                  //         postId: model.postId
+                  //     );
 
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          IconBroken.Heart,
-                          color: Colors.red,
-                          size: 20,
-                        ),
-                        Text(
-                          SocialCubit.get(context).likedpost.toString(),
-                          style: TextStyle(fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ),
+                  //   },
+                  //   child: Row(
+                  //     children: [
+                  //       Icon(
+                  //         IconBroken.Heart,
+                  //         color: Colors.red,
+                  //         size: 20,
+                  //       ),
+                  //       Text(
+                  //         SocialCubit.get(context).likedpost.toString(),
+                  //         style: TextStyle(fontSize: 13),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   SizedBox(
                     width: 15,
                   ),

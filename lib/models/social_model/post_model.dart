@@ -11,7 +11,9 @@ import 'media_model.dart';
 class PostModel {
   String? name;
   String? text;
+  String? textTemp;
   List? tags;
+  List? tagsTemp;
   List<PostModelSub>? albumImages;
   List<PostModelSub>? posts;
   String? postImage;
@@ -23,15 +25,21 @@ class PostModel {
   String? date;
   String? time;
   String? nameAlbum;
+  String? nameAlbumTemp;
   String? des;
+  String? desTemp;
   FieldValue? dateTime;
+  FieldValue? unfollowing;
 
 
   PostModel({
     this.name,
     this.nameAlbum,
+    this.nameAlbumTemp,
     this.des,
+    this.desTemp,
     this.text,
+    this.textTemp,
     this.likes,
     this.image,
     this.comments,
@@ -42,6 +50,7 @@ class PostModel {
     this.date,
     this.dateTime,
     this.tags,
+    this.tagsTemp,
     this.albumImages,
     this.posts,
    
@@ -50,8 +59,11 @@ class PostModel {
   PostModel.fromJson(Map<String, dynamic>? json) {
     name = json!['name'];
     nameAlbum = json['nameAlbum'];
+    nameAlbumTemp = json['nameAlbumTemp'];
     des = json['des'];
+    desTemp = json['desTemp'];
     text = json['text'];
+    textTemp = json['textTemp'];
     likes = json['likes'];
     comments = json['comments'];
     postId = json['postId'];
@@ -61,6 +73,7 @@ class PostModel {
     time = json['time'];
     date = json['date'];
     tags = json['tags'];
+    tagsTemp = json['tagsTemp'];
     albumImages = json['albumImages'];
     albumImages = json['posts'];
    
@@ -76,8 +89,11 @@ class PostModel {
     return {
       'name': name,
       'nameAlbum': nameAlbum,
+      'nameAlbumTemp': nameAlbumTemp,
       'des': des,
+      'desTemp': desTemp,
       'text': text,
+      'textTemp': textTemp,
       'comments': comments,
       'likes': likes,
       'postId': postId,
@@ -88,6 +104,7 @@ class PostModel {
       'date': date,
       'dateTime': dateTime,
       'tags': tags,
+      'tagsTemp': tagsTemp,
       'albumImages': albumImages,
     
     };

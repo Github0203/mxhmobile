@@ -39,7 +39,8 @@ PreferredSizeWidget  defaultAppBar({
   String ? title,
    List<Widget> ? actions,
 }) => AppBar(
-  leading: IconButton(
+  leading: 
+  IconButton(
     onPressed: ()
     {
       // Navigator.pop(context);
@@ -270,7 +271,8 @@ Widget baseAlertDialog({
   String? choose1,
   String? choose2,
 }){
-  return AlertDialog(
+  return 
+  AlertDialog(
     title: Text('$title',),
     titlePadding: EdgeInsetsDirectional.only(start:13,top: 15 ),
     content: Text('$content',),
@@ -283,6 +285,10 @@ Widget baseAlertDialog({
           child:        
           OutlinedButton(
           onPressed: (){
+            SocialCubit.get(context).postImage = null;
+            SocialCubit.get(context).paths = null;
+            SocialCubit.get(context).editsubpostTempWhenCreatePost = null;
+          SocialCubit.get(context).editsubpostDetailwhenCreate = null;
             Navigator.of(context).pop(true);
             Navigator.of(context).pop(true);
           },

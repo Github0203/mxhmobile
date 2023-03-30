@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socialapp/layout/socialapp/sociallayout.dart';
 import 'package:socialapp/modules/feeds/feedDetail.dart';
-import 'package:socialapp/modules/new_post/new_post_personal.dart';
+import 'package:socialapp/modules/new_post/new_post_album.dart';
 
 import '../../../layout/socialapp/cubit/cubit.dart';
 import '../../../layout/socialapp/cubit/state.dart';
@@ -35,6 +35,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+import 'package:readmore/readmore.dart';
+import 'package:expandable/expandable.dart';
 
 
 class ProfileScreen extends StatefulWidget {
@@ -63,7 +65,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
      var scaffoldKey = GlobalKey<ScaffoldState>();
     return Builder(
       builder: (context) {
-        SocialCubit.get(context).getPosts();
 
         return BlocConsumer<SocialCubit, SocialStates>(
           listener: (context,state){
@@ -83,6 +84,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               var socialUserModel = SocialCubit.get(context).socialUserModel;
               var profileImage = SocialCubit.get(context).profileImage;
               var coverImage = SocialCubit.get(context).coverImage;
+              SocialCubit.get(context).getPostsFriend(socialUserModel!.uId);
+              SocialCubit.get(context).getFollowers(socialUserModel.uId);
+              SocialCubit.get(context).getFollowerings(socialUserModel.uId);
               return ConditionalBuilder(
                  condition: SocialCubit.get(context).posts1.isNotEmpty &&
                   SocialCubit.get(context).socialUserModel != null,
@@ -141,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Column(
                                     children: [
                                       Text(
-                                        '100',
+                                        SocialCubit.get(context).posts1.length.toString(),
                                         style: Theme.of(context).textTheme.subtitle2,
                                       ),
                                       Text(
@@ -155,30 +159,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
               
+                              
                               Expanded(
                                 child: InkWell(
                                   child: Column(
                                     children: [
                                       Text(
-                                        '265',
-                                        style: Theme.of(context).textTheme.subtitle2,
-                                      ),
-                                      Text(
-                                        'Photos',
-                                        style: Theme.of(context).textTheme.caption,
-                                      ),
-                                    ],
-              
-                                  ),
-                                  onTap: (){},
-                                ),
-                              ),
-                              Expanded(
-                                child: InkWell(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        '10K',
+                                        SocialCubit.get(context).followModel!.length.toString(),
+                                        
                                         style: Theme.of(context).textTheme.subtitle2,
                                       ),
                                       Text(
@@ -196,7 +184,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Column(
                                     children: [
                                       Text(
-                                        '103',
+                                        // '103',
+                                        SocialCubit.get(context).getIDFollowing == null ?
+                                        '0' :
+                                        SocialCubit.get(context).getIDFollowing.toString(),
                                         style: Theme.of(context).textTheme.subtitle2,
                                       ),
                                       Text(
@@ -289,8 +280,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                      //   SocialCubit.get(context).selectImages();
                                                      // },
                                                  onPressed: () {
-                                                  SocialCubit.get(context).getImageDataCubut();
-                                                 navigateTo(context, Photos_videos(socialUserModel.name));
+                                                  SocialCubit.get(context).getUserDataFriend(socialUserModel.uId);
+                                                  SocialCubit.get(context).getImageDataCubut(socialUserModel.uId);
+                                                 navigateTo(context, Photos_videos(socialUserModel.name, ));
                                                  },
                                                      child: Row(
                                                        mainAxisAlignment: MainAxisAlignment.start,
@@ -428,7 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: Column(
                                       children: [
                                         Text(
-                                          '100',
+                                          SocialCubit.get(context).posts1.length.toString(),
                                           style: Theme.of(context).textTheme.subtitle2,
                                         ),
                                         Text(
@@ -442,30 +434,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                              
+                                
                                 Expanded(
                                   child: InkWell(
                                     child: Column(
                                       children: [
                                         Text(
-                                          '265',
-                                          style: Theme.of(context).textTheme.subtitle2,
-                                        ),
-                                        Text(
-                                          'Photos',
-                                          style: Theme.of(context).textTheme.caption,
-                                        ),
-                                      ],
-                             
-                                    ),
-                                    onTap: (){},
-                                  ),
-                                ),
-                                Expanded(
-                                  child: InkWell(
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          '10K',
+                                          SocialCubit.get(context).followModel!.length.toString(),
                                           style: Theme.of(context).textTheme.subtitle2,
                                         ),
                                         Text(
@@ -483,7 +458,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: Column(
                                       children: [
                                         Text(
-                                          '104',
+                                          SocialCubit.get(context).getIDFollowing == null ?
+                                        '0' :
+                                        SocialCubit.get(context).getIDFollowing.toString(),
+                                          
                                           style: Theme.of(context).textTheme.subtitle2,
                                         ),
                                         Text(
@@ -505,6 +483,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: OutlinedButton(
                                   child:const Text('Add Photos',style: TextStyle(color: Colors.blue),) , onPressed: (){
                                   SocialCubit.get(context).paths = null;
+                                  SocialCubit.get(context).editsubpostTempWhenCreatePost = null;
                                     navigateTo(context, NewPostPersonalScreen());
                                   },
                                   style:OutlinedButton.styleFrom(primary: Colors.grey)
@@ -574,8 +553,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                      //   SocialCubit.get(context).selectImages();
                                                      // },
                                                  onPressed: () {
-                                                  SocialCubit.get(context).getImageDataCubut();
-                                                 navigateTo(context, Photos_videos(socialUserModel.name));
+                                                  SocialCubit.get(context).getUserDataFriend(socialUserModel.uId);
+                                                  SocialCubit.get(context).getImageDataCubut(socialUserModel.uId);
+                                                 navigateTo(context, Photos_videos(socialUserModel.name, ));
                                                  },
                                                      child: Row(
                                                        mainAxisAlignment: MainAxisAlignment.start,
@@ -742,14 +722,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               myDivider(),
-              model.text != null
-                  ? Text(
-                      '${model.text}',
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    )
-                  : Text('${model.text}', style: TextStyle(fontSize: 20)),
+              model.text != null ?
+                            ReadMoreText(
+                  '${model.text}',
+                  trimLines: 2,
+                  colorClickableText: Colors.pink,
+                  trimMode: TrimMode.Line,
+                  trimCollapsedText: '...Show more',
+                  trimExpandedText: ' show less',
+                ) : Text(''),
               // if (model.subPost.postImage.toString() != null)
                 // Padding(
                 //     padding: const EdgeInsetsDirectional.only(top: 10),
@@ -795,14 +776,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                    width: MediaQuery.of(context).size.width - 26,
               height: urls.length == 1 ?
-                      300 : 
+                      250 : 
                       urls.length == 2 ?
                       210 :
                       urls.length == 3 ?
                       140 : 
                       urls.length >= 4 ?
                       400 : 0,
-
+color: Color.fromARGB(192, 175, 171, 171),
                   child: 
                   PhotoGrid(
                             imageUrls: urls,
@@ -939,7 +920,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onTap: () async {
                       SocialUserModel ? postUser = SocialCubit.get(context).socialUserModel;
                       await SocialCubit.get(context).likedByMe(
-                          liked: true,
                           postUser: postUser,
                           context: context,
                           postModel: model,

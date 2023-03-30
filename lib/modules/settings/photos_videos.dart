@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socialapp/layout/socialapp/sociallayout.dart';
 import 'package:socialapp/modules/feeds/feedDetail.dart';
-import 'package:socialapp/modules/new_post/new_post_personal.dart';
+import 'package:socialapp/modules/new_post/new_post_album.dart';
 
 import '../../../layout/socialapp/cubit/cubit.dart';
 import '../../../layout/socialapp/cubit/state.dart';
@@ -23,10 +23,10 @@ import 'package:socialapp/modules/albums/loadalbums.dart';
 import 'package:socialapp/shared/components/switches.dart';
 
 class Photos_videos extends StatelessWidget {
-  final String? userName;
+  String? userName;
 
   
-  const Photos_videos(this.userName, {Key? key}) : super(key: key);
+  Photos_videos(this.userName, {Key? key}) : super(key: key);
 
 
   @override
@@ -48,15 +48,11 @@ class Photos_videos extends StatelessWidget {
             },
             builder: (context,state)
               {                 
-                // SocialUserModel? userModel = SocialCubit.get(context).socialUserModel;
-                double setWidth = MediaQuery.of(context).size.width;
-                double setheight = MediaQuery.of(context).size.height;
-                var socialUserModel = SocialCubit.get(context).socialUserModel;
-                var profileImage = SocialCubit.get(context).profileImage;
-                var coverImage = SocialCubit.get(context).coverImage;
+             print('00000000000000000000000000000000000000000');
+             print(SocialCubit.get(context).posts3.toString());
                 return ConditionalBuilder(
                    condition: SocialCubit.get(context).posts3.isNotEmpty &&
-                    SocialCubit.get(context).socialUserModel != null,
+                    SocialCubit.get(context).getsocialUserModelFriend != null,
                 builder: (context) =>
                  SingleChildScrollView(
                     physics: BouncingScrollPhysics(),

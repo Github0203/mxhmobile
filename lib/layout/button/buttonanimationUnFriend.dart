@@ -49,10 +49,10 @@ class _buttonanimationUnFriendState extends State<buttonanimationUnFriend> {
 
           
       ButtonState.fail: IconedButton(
-          text: SocialCubit.get(context).checkfriend == true ? "Flollow1" : "Following1",
+          text:"Following1",
           
           icon: Icon(Icons.follow_the_signs_outlined, color: Colors.white),
-          color: SocialCubit.get(context).checkfriend == true ? Colors.deepPurple.shade500 : Colors.green.shade500,
+          color:  Colors.green.shade500,
            ),
       ButtonState.success: IconedButton(
           text: "Success",

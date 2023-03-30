@@ -37,9 +37,9 @@ class _buttonanimationFollowState extends State<buttonanimationFollow> {
 
 
       ButtonState.idle: IconedButton(
-          text: SocialCubit.get(context).checkfollow == false ? "Following" : "Flollow",
+          text: "Flollow",
           icon: Icon(Icons.follow_the_signs_outlined, color: Colors.white),
-          color: SocialCubit.get(context).checkfollow == false ? Colors.green.shade500 : Colors.deepPurple.shade500,
+          color: Colors.deepPurple.shade500,
            ),
 
 
@@ -89,67 +89,25 @@ class _buttonanimationFollowState extends State<buttonanimationFollow> {
            print('kiem tra check folloew theo doi');
           print(SocialCubit.get(context).checkfollow);
           print('ggg');
-          if(SocialCubit.get(context).checkfollow == true)
-          {
-            SocialCubit.get(context).Addfollower(userModelFriend: widget.getuserModelFriend!, dateTime: DateFormat.jm().format(DateTime.now()),);
-          }
-          else
-          {
-                SocialCubit.get(context).unFollowing(widget.getuserModelFriend!.uId, SocialCubit.get(context).getIDFollow.toString());
-          }
+       
+            SocialCubit.get(context).Addfollower(userModelFriend: widget.getuserModelFriend!, );
+      
           setState(() {
-            if(SocialCubit.get(context).checkfollow == false) {
-              // SocialCubit.get(context).unFollowing(widget.getuserModelFriend!.uId, SocialCubit.get(context).getIDFollow.toString());
-              stateTextWithIconFollow = ButtonState.idle;
-            }
-            if(SocialCubit.get(context).checkfollow == true) {
-              // SocialCubit.get(context).Addfollower(userModelFriend: widget.getuserModelFriend!, dateTime: DateFormat.jm().format(DateTime.now()),);
-              stateTextWithIconFollow = ButtonState.idle;
-            }
-            ;
-            // SocialCubit.get(context).Addfollower(uId: widget.getuserModel!.uId.toString(), userModel: widget.getuserModel!, dateTime: DateFormat.jm().format(DateTime.now()),);
-            // stateTextWithIcon = Random.secure().nextBool()
-            //     ? ButtonState.success
-            //     : 
-            //     ButtonState.fail;
+            // if(SocialCubit.get(context).checkfollow == false) {
+            //   // SocialCubit.get(context).unFollowing(widget.getuserModelFriend!.uId, SocialCubit.get(context).getIDFollow.toString());
+            //   stateTextWithIconFollow = ButtonState.idle;
+            // }
+            // if(SocialCubit.get(context).checkfollow == true) {
+            //   // SocialCubit.get(context).Addfollower(userModelFriend: widget.getuserModelFriend!, dateTime: DateFormat.jm().format(DateTime.now()),);
+            //   stateTextWithIconFollow = ButtonState.idle;
+            // }
+            // ;
           }
           );
         });
 
         break;
       case ButtonState.fail:
-        //   stateTextWithIconFollow = ButtonState.loading; 
-        // Future.delayed(Duration(seconds: 1), () {
-        //   SocialCubit.get(context).checkFollowing(widget.uIdMine, widget.getuserModelFriend!, DateFormat.jm().format(DateTime.now()),);
-        //   print('kiem tra check folloew huy theo doi');
-        //   print(SocialCubit.get(context).checkfollow);
-        //   if(SocialCubit.get(context).checkfollow == true)
-        //   {
-        //     SocialCubit.get(context).Addfollower(userModelFriend: widget.getuserModelFriend!, dateTime: DateFormat.jm().format(DateTime.now()),);
-        //   }
-        //   else
-        //   {
-        //         SocialCubit.get(context).unFollowing(widget.getuserModelFriend!.uId, SocialCubit.get(context).getIDFollow.toString());
-        //   }
-        //   setState(() {
-        //     if(SocialCubit.get(context).checkfollow == true) {
-        //       // SocialCubit.get(context).unFollowing(widget.getuserModelFriend!.uId, SocialCubit.get(context).getIDFollow.toString());
-        //       stateTextWithIconFollow = ButtonState.fail;
-        //     }
-        //     if(SocialCubit.get(context).checkfollow == false) {
-        //       // SocialCubit.get(context).Addfollower(userModelFriend: widget.getuserModelFriend!, dateTime: DateFormat.jm().format(DateTime.now()),);
-        //       stateTextWithIconFollow = ButtonState.idle;
-        //     }
-
-        //     // stateTextWithIconFollow = ButtonState.idle;
-        //     // SocialCubit.get(context).Addfollower(uId: widget.getuserModel!.uId.toString(), userModel: widget.getuserModel!, dateTime: DateFormat.jm().format(DateTime.now()),);
-        //     // stateTextWithIcon = Random.secure().nextBool()
-        //     //     ? ButtonState.success
-        //     //     : 
-        //     //     ButtonState.fail;
-        //   }
-        //   );
-        // });
         break;
       case ButtonState.loading:
         // TODO: Handle this case.
@@ -158,14 +116,17 @@ class _buttonanimationFollowState extends State<buttonanimationFollow> {
         // TODO: Handle this case.
         break;
     }
-    // setState(() {
-    //   if(SocialCubit.get(context).checkfollow == true) {
-    //   stateTextWithIconFollowing = stateTextWithIconFollow;
-    //   }
-    //   else{
-    //     stateTextWithIconFollow = stateTextWithIconFollowing;
-    //   }
-    // });
+   SocialCubit.get(context).AddNotification(
+      uIdReciver: widget.getuserModelFriend!.uId,
+      uIdSender: widget.uIdMine!,
+      image: SocialCubit.get(context).socialUserModel!.image.toString(),
+      title: SocialCubit.get(context).socialUserModel!.name.toString(),
+      body: ' followed you.',
+      type: '2',
+      seen: 'no',
+      display: 'yes'
+      );
+      SocialCubit.get(context).sendPushMessageFriendRequire(widget.getuserModelFriend!.token.toString(), ' followed you.',SocialCubit.get(context).socialUserModel!.name.toString(), SocialCubit.get(context).socialUserModel!.uId) ;
   }
 
 }

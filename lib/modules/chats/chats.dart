@@ -11,27 +11,33 @@ import '../../../models/social_model/social_user_model.dart';
 import '../../../shared/components/components.dart';
 import '../chat_details/chat_details.dart';
 
-class Chats extends StatelessWidget {
+class Chats extends StatefulWidget {
   const Chats({Key? key}) : super(key: key);
 
+  @override
+  State<Chats> createState() => _ChatsState();
+}
 
-
+class _ChatsState extends State<Chats> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SocialCubit,SocialStates>(
       listener: (context ,state){},
       builder: (context,state){
-        return ConditionalBuilder(
-         condition:SocialCubit.get(context).users.isNotEmpty ,
-          builder: (context)=>ListView.separated(
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context,index)=> buildChatItem(SocialCubit.get(context).users[index],context),
-              separatorBuilder: (context,state) => myDivider(),
-              itemCount: SocialCubit.get(context).users.length),
-          fallback: (context)=> 
-          SocialCubit.get(context).users.length == 0 ?
-          Center(child:Text('Chưa có người bạn nào')) :
-          Center(child: CircularProgressIndicator()),
+        return RefreshIndicator(
+              onRefresh: () async { setState(() {}); },
+          child: ConditionalBuilder(
+           condition:SocialCubit.get(context).users.isNotEmpty ,
+            builder: (context)=>ListView.separated(
+                physics: BouncingScrollPhysics(),
+                itemBuilder: (context,index)=> buildChatItem(SocialCubit.get(context).users[index],context),
+                separatorBuilder: (context,state) => myDivider(),
+                itemCount: SocialCubit.get(context).usersfriend.length),
+            fallback: (context)=> 
+            SocialCubit.get(context).usersfriend.length == 0 ?
+            Center(child:Text('Chưa có người bạn nào')) :
+            Center(child: CircularProgressIndicator()),
+          ),
         );
       },
 

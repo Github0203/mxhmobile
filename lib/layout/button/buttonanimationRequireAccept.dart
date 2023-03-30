@@ -48,10 +48,10 @@ class _buttonanimationRequireAcceptState extends State<buttonanimationRequireAcc
 
           
       ButtonState.fail: IconedButton(
-          text: SocialCubit.get(context).checkfriend == true ? "Flollow1" : "Following1",
+          text:"Following1",
           
           icon: Icon(Icons.follow_the_signs_outlined, color: Colors.white),
-          color: SocialCubit.get(context).checkfriend == true ? Colors.deepPurple.shade500 : Colors.green.shade500,
+          color:  Colors.green.shade500,
            ),
       ButtonState.success: IconedButton(
           text: "Success",
@@ -86,7 +86,7 @@ class _buttonanimationRequireAcceptState extends State<buttonanimationRequireAcc
         //  stateTextWithIconFollow = ButtonState.loading;
         Future.delayed(Duration(seconds: 1), () {
           // stateTextWithIconFollow = ButtonState.loading;
-          SocialCubit.get(context).acceptFRIEND(widget.getuserModelFriend!.uId);
+          SocialCubit.get(context).acceptFRIEND(widget.getuserModelFriend, widget.getuserModelFriend!.uId);
        
         });
 
@@ -132,7 +132,7 @@ class _buttonanimationRequireAcceptState extends State<buttonanimationRequireAcc
         // TODO: Handle this case.
         break;
     }
-    SocialCubit.get(context).sendPushMessageFriendRequire(widget.getuserModelFriend!.token.toString(), 'title1','body', SocialCubit.get(context).socialUserModel!.uId) ;
+    SocialCubit.get(context).sendPushMessageFriendRequire(widget.getuserModelFriend!.token.toString(), 'Accept the invitation',SocialCubit.get(context).socialUserModel!.name.toString() + ', friend request accepted', SocialCubit.get(context).socialUserModel!.uId) ;
     // setState(() {
     //   if(SocialCubit.get(context).checkfriend == true) {
     //   stateTextWithIconFollowing = stateTextWithIconFollow;

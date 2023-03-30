@@ -12,28 +12,38 @@ import '../../../shared/components/components.dart';
 import '../chat_details/chat_details.dart';
 import '../settings/Profile_screen_friend.dart';
 
-class Friends extends StatelessWidget {
+class Friends extends StatefulWidget {
   const Friends({Key? key}) : super(key: key);
 
+  @override
+  State<Friends> createState() => _FriendsState();
+}
 
-
+class _FriendsState extends State<Friends> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SocialCubit,SocialStates>(
       listener: (context ,state){},
       builder: (context,state){
-        SocialCubit.get(context).getAllUsersToken();
-        return ConditionalBuilder(
-         condition:SocialCubit.get(context).users.isNotEmpty ,
-          builder: (context)=>ListView.separated(
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context,index)=> buildProfileItem(SocialCubit.get(context).users[index],context),
-              separatorBuilder: (context,state) => myDivider(),
-              itemCount: SocialCubit.get(context).users.length),
-          fallback: (context)=> 
-          SocialCubit.get(context).users.length == 0 ?
-          Center(child:Text('Chưa có người bạn nào')) :
-          Center(child: CircularProgressIndicator()),
+        //  SocialCubit.get(context).getAllUsersFriend();
+        return RefreshIndicator(
+              onRefresh: () async { setState(() {}); },
+          child: ConditionalBuilder(
+           condition:SocialCubit.get(context).usersfriend.isNotEmpty ,
+            builder: (context)=>ListView.separated(
+                physics: BouncingScrollPhysics(),
+                itemBuilder: (context,index)=> buildProfileItem(SocialCubit.get(context).usersfriend[index],context),
+                separatorBuilder: (context,state) => myDivider(),
+                itemCount: SocialCubit.get(context).usersfriend.length),
+            fallback: (context)=> 
+            SocialCubit.get(context).usersfriend.length == 0 ?
+            Column(
+              children: [
+                Center(child:Text('Chưa có người bạn nào')),
+              ],
+            ) :
+            Center(child: CircularProgressIndicator()),
+          ),
         );
       },
 
@@ -42,8 +52,9 @@ class Friends extends StatelessWidget {
 
   Widget buildProfileItem(SocialUserModel modelUserFriend ,context) => InkWell(
         onTap: (){
+          
           navigateTo(context, ProfileScreenFriend(  
-            getuserModelFriend: modelUserFriend, userId: SocialCubit.get(context).socialUserModel!.uId
+            userId: modelUserFriend.uId
           ));
         },
         child: Padding(

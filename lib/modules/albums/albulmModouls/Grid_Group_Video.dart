@@ -115,8 +115,9 @@ class _Grid_Group_VideoState extends State<Grid_Group_Video>
                   fallback: (context) => Column(
                     children: [
                       Column(
-                        children: [
-                          Center(child: CircularProgressIndicator()),
+                        children: const <Widget>[
+                          // Center(child: CircularProgressIndicator()),
+                          Center(child: Text('Not video yet')),
                         ],
                       ),
                     ],

@@ -90,6 +90,30 @@ class SocialGetSubPostLoadingState extends SocialStates {}
 
 class SocialGetSubPostSuccessState extends SocialStates {}
 
+class SocialGetSubPostTempErrorState extends SocialStates {}
+
+class SocialGetSubPostTempLoadingState extends SocialStates {}
+
+class SocialGetSubPostTempSuccessState extends SocialStates {}
+
+class SocialGetEditSubPostErrorState extends SocialStates {}
+
+class SocialGetEditSubPostLoadingState extends SocialStates {}
+
+class SocialGetEditSubPostSuccessState extends SocialStates {}
+
+class SocialSaveEditSubPostLoadingState extends SocialStates {}
+
+class SocialSaveEditSubPostSuccessState extends SocialStates {}
+
+class SocialSaveEditSubPostErrorState extends SocialStates {}
+
+class SocialGetEditPostErrorState extends SocialStates {}
+
+class SocialGetEditPostLoadingState extends SocialStates {}
+
+class SocialGetEditPostSuccessState extends SocialStates {}
+
 class SocialAllPhotosErrorState extends SocialStates {}
 
 class SocialAllPhotosLoadingState extends SocialStates {}
@@ -138,6 +162,8 @@ class SocialRemovePostState extends SocialStates {}
 
 class DeletePostSuccessState extends SocialStates {}
 
+class DeleteSubPostSuccessState extends SocialStates {}
+
 class SocialGetPostsLoadingState extends SocialStates {}
 
 class SocialGetPostsSuccessState extends SocialStates {}
@@ -146,6 +172,16 @@ class SocialGetPostsErrorState extends SocialStates {
   final String error;
 
   SocialGetPostsErrorState(this.error);
+}
+
+class SocialGetDetailPostsLoadingState extends SocialStates {}
+
+class SocialGetDetailPostsSuccessState extends SocialStates {}
+
+class SocialGetDetailPostsErrorState extends SocialStates {
+  final String error;
+
+  SocialGetDetailPostsErrorState(this.error);
 }
 
 class SocialLikePostsSuccessState extends SocialStates {}
@@ -219,11 +255,39 @@ class SocialCommentErrorState extends SocialStates {
   SocialCommentErrorState(this.error);
 }
 
+class SocialNotificationLoadingState extends SocialStates {}
+
+class SociallNotificationSuccessState extends SocialStates {}
+
+class SociallNotificationErrorState extends SocialStates {
+  final String error;
+
+  SociallNotificationErrorState(this.error);
+}
+
+class GetSocialNotificationLoadingState extends SocialStates {}
+
+class GetSociallNotificationSuccessState extends SocialStates {}
+
+class UpdateSociallNotificationSuccessState extends SocialStates {}
+
+class GetSociallNotificationErrorState extends SocialStates {
+  final String error;
+
+  GetSociallNotificationErrorState(this.error);
+}
+
 class GetCommentLoadingState extends SocialStates {}
 
 class GetCommentSuccessState extends SocialStates {}
 
 class GetCommentsErrorState extends SocialStates {}
+
+class GetLikedLoadingState extends SocialStates {}
+
+class GetLikedSuccessState extends SocialStates {}
+
+class GetLikedsErrorState extends SocialStates {}
 
 class GetCommentSubLoadingState extends SocialStates {}
 
@@ -299,6 +363,14 @@ class DeleteAllFilePickerSuccessState extends SocialStates {}
 
 class DeleteAllFilePickerErrorState extends SocialStates {}
 
+class EditItemTempSuccessState extends SocialStates {}
+
+class EditItemTempErrorState extends SocialStates {}
+
+class GetEditItemTempSuccessState extends SocialStates {}
+
+class GetEditItemTempErrorState extends SocialStates {}
+
 class ResetPostSuccessState extends SocialStates {}
 
 class ResetPostErrorState extends SocialStates {}
@@ -341,6 +413,8 @@ class UnFollowerErrorState extends SocialStates {}
 
 class GetFollowerSuccessState extends SocialStates {}
 
+class SetShowMoreTagsSuccessState extends SocialStates {}
+
 class GetFollowerErroeState extends SocialStates {}
 
 class CheckFriendsuccessState extends SocialStates {}
@@ -368,3 +442,7 @@ class GetFriendsErroeState extends SocialStates {}
 class SendNotifiSuccessState extends SocialStates {}
 
 class SendNotifiErrorState extends SocialStates {}
+
+class GetTagsPostSuccessState extends SocialStates {}
+
+class GetTagsPostErrorState extends SocialStates {}

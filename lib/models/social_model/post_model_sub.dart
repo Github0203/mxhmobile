@@ -10,7 +10,9 @@ import 'media_model.dart';
 class PostModelSub {
   String? name;
   String? text;
+  String? textTemp;
   List? tags;
+  List? tagsTemp;
   String? postImage;
   String? uId;
   String? image;
@@ -22,11 +24,13 @@ class PostModelSub {
   String? time;
   FieldValue? dateTime;
   String? type;
+  String? display;
 
 
   PostModelSub({
     this.name,
     this.text,
+    this.textTemp,
     this.likes,
     this.image,
     this.comments,
@@ -38,13 +42,16 @@ class PostModelSub {
     this.date,
     this.dateTime,
     this.tags,
+    this.tagsTemp,
     this.type,
+    this.display,
   });
 
   PostModelSub.fromJson(Map<String, dynamic>? json) {
     name = json!['name'];
-    text = json['text'];
     likes = json['likes'];
+    text = json['text'];
+    textTemp = json['textTemp'];
     comments = json['comments'];
     postId = json['postId'];
     postIdSub = json['postIdSub'];
@@ -54,7 +61,9 @@ class PostModelSub {
     time = json['time'];
     date = json['date'];
     tags = json['tags'];
+    tagsTemp = json['tagsTemp'];
     type = json['type'];
+    type = json['display'];
 
 
   }
@@ -67,6 +76,7 @@ class PostModelSub {
     return {
       'name': name,
       'text': text,
+      'textTemp': textTemp,
       'comments': comments,
       'likes': likes,
       'postId': postId,
@@ -78,7 +88,9 @@ class PostModelSub {
       'date': date,
       'dateTime': dateTime,
       'tags': tags,
+      'tagsTemp': tagsTemp,
       'type': type,
+      'display': display,
     };
   }
 }

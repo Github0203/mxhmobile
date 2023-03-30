@@ -122,19 +122,20 @@ class _Grid_GroupState extends State<Grid_Group>
             builder: (context) {
               return BlocConsumer<SocialCubit, SocialStates>(
                   listener: (context, state) {
-                    if(state is LoadAlbumLevel1SuccessState){
-                      showToast(text: 'Load Abum thành công', state: ToastStates.SUCCESS);
-                    }
+                    // if(state is LoadAlbumLevel1SuccessState){
+                    //   showToast(text: 'Load Abum thành công', state: ToastStates.SUCCESS);
+                    // }
                   },
           builder: (context, state) {
             SocialUserModel? userModel =
-                SocialCubit.get(context).socialUserModel;
+                SocialCubit.get(context).getsocialUserModelFriend;
             double setWidth = MediaQuery.of(context).size.width;
             double setheight = MediaQuery.of(context).size.height;
 
             return ConditionalBuilder(
-              condition: SocialCubit.get(context).imageList.isNotEmpty &&
-                  SocialCubit.get(context).socialUserModel != null,
+              condition: 
+              SocialCubit.get(context).posts3.isNotEmpty &&
+                  SocialCubit.get(context).getsocialUserModelFriend != null,
               builder: (context) =>  
               
               ListView.builder(
@@ -146,6 +147,8 @@ class _Grid_GroupState extends State<Grid_Group>
                 Column(
                   children: [
                     Container(
+                      height: setheight*0.7,
+                      width: setWidth-20,
                                     child: Wrap(
                                       direction: Axis.horizontal,
                                       children: 
@@ -160,6 +163,7 @@ class _Grid_GroupState extends State<Grid_Group>
                   ],
                 ),
                               ),
+                
                   fallback: (context) => Column(
                     children: [
                       Center(child: CircularProgressIndicator()),
@@ -187,7 +191,7 @@ class _Grid_GroupState extends State<Grid_Group>
                 if (!snapshot.hasData) return const Text('Loading...');
                 final int surveysCount = snapshot.data!.docs.length;
                 List<DocumentSnapshot> documents = snapshot.data!.docs;
-                
+                print('00000000000000000000000');
                 List<String> listpostIdSubID = [];
                 documents.forEach((doc) {
                  if( getUserModer.uId == doc['uId']){

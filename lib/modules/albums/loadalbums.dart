@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socialapp/layout/socialapp/sociallayout.dart';
 import 'package:socialapp/modules/feeds/feedDetail.dart';
-import 'package:socialapp/modules/new_post/new_post_personal.dart';
+import 'package:socialapp/modules/new_post/new_post_album.dart';
 
 import '../../../layout/socialapp/cubit/cubit.dart';
 import '../../../layout/socialapp/cubit/state.dart';
@@ -23,9 +23,9 @@ import 'package:socialapp/modules/albums/albulmModouls/Grid_Group.dart';
 import 'package:socialapp/modules/albums/albulmModouls/Grid_Group_Video.dart';
 
 class LoadAlbums extends StatefulWidget {
-  List<PostModelSub>? getlistpostmodelsub;
+
   
-  LoadAlbums({this.getlistpostmodelsub, Key? key}) : super(key: key);
+  LoadAlbums({ Key? key}) : super(key: key);
 
   @override
   State<LoadAlbums> createState() => _LoadAlbumsState();
@@ -40,7 +40,7 @@ class _LoadAlbumsState extends State<LoadAlbums> {
      var scaffoldKey = GlobalKey<ScaffoldState>();
     return Builder(
       builder: (context) {
-        // SocialCubit.get(context).getPosts();
+        // SocialCubit.get(context).getUserDataFriend(widget.getuId!);
 
         return BlocConsumer<SocialCubit, SocialStates>(
           listener: (context,state){
@@ -61,8 +61,10 @@ class _LoadAlbumsState extends State<LoadAlbums> {
               var profileImage = SocialCubit.get(context).profileImage;
               var coverImage = SocialCubit.get(context).coverImage;
               return ConditionalBuilder(
-                 condition: SocialCubit.get(context).posts3.isNotEmpty &&
-                  SocialCubit.get(context).socialUserModel != null,
+                 condition: 
+                 SocialCubit.get(context).posts3.isNotEmpty 
+                 &&
+                  SocialCubit.get(context).getsocialUserModelFriend != null,
               builder: (context) =>
                SingleChildScrollView(
                   physics: BouncingScrollPhysics(),
@@ -94,7 +96,7 @@ class _LoadAlbumsState extends State<LoadAlbums> {
                            ],
                            onSelect: (int index) => {
                              setState(() => switcherIndex = index),
-                            SocialCubit.get(context).getAllVideos(),
+                            SocialCubit.get(context).getAllVideos(SocialCubit.get(context).getsocialUserModelFriend!.uId.toString()),
                             // SocialCubit.get(context).getAllimgne(),
                              },
                            containerColor: Colors.transparent,
@@ -132,10 +134,14 @@ class _LoadAlbumsState extends State<LoadAlbums> {
                            child: Grid_Group(),
                          )
                          :
-                         Container(
-                           height: setheight*0.8,
-                           width: setWidth*0.8,
-                           child: Grid_Group_Video(),
+                         Column(
+                           children: [
+                             Container(
+                               height: setheight*0.8,
+                               width: setWidth*0.8,
+                               child: Grid_Group_Video(),
+                             ),
+                           ],
                          )
                         ),
                         ]
@@ -150,6 +156,7 @@ class _LoadAlbumsState extends State<LoadAlbums> {
                     child: 
                  Column(
                       children: [
+                        Text('No have album')
                       ]
                   ),
                   ),),

@@ -20,7 +20,7 @@ class CommentsScreen extends StatelessWidget {
   String? postId;
   String? postUid;
 
-  CommentsScreen({this.postId,  this.likes, this.postUid});
+  CommentsScreen({this.postId, this.likes, this.postUid});
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +37,8 @@ class CommentsScreen extends StatelessWidget {
               // PostModel? post = SocialCubit.get(context).singlePost;
               List<CommentModel> comments = SocialCubit.get(context).comments;
               SocialUserModel? user = SocialCubit.get(context).socialUserModel;
+              double setWidth = MediaQuery.of(context).size.width;
+              double setHeight = MediaQuery.of(context).size.height;
               return Scaffold(
                 appBar: AppBar(
                   automaticallyImplyLeading: true,
@@ -65,20 +67,40 @@ class CommentsScreen extends StatelessWidget {
                               SizedBox(
                                 width: 5,
                               ),
-                              InkWell
-                              (
-                                onTap: () {
-                                  
-                                           Navigator.push(
-    context, CupertinoPageRoute(
-      builder: (context) => UserLike(postId!)
-                                        ));
+                              InkWell(
+                                onTap: () => showDialog(
+                                  context: context,
+                                  barrierColor:
+                                      Color.fromARGB(97, 184, 181, 181),
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("Liked post"),
+                                      titleTextStyle: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                          fontSize: 20),
+                                      // backgroundColor: Colors.greenAccent,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                      //  content: UserLike(postId!),
+                                      content: Container(
+                                         height: setHeight * 0.5,
+                                      width: setWidth * 0.7,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            UserLike(postId!)
+                                          ],
+                                        ),
+                                      ),
+                                    );
                                   },
+                                ),
                                 child: Text(
                                   'tap to see who like your post',
                                 ),
                               ),
-
                             ],
                           ),
                         ),
@@ -171,7 +193,6 @@ class CommentsScreen extends StatelessWidget {
                                 }
                                 return null;
                               },
-
                               decoration: InputDecoration(
                                   focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(40),
@@ -197,34 +218,35 @@ class CommentsScreen extends StatelessWidget {
                                       IconButton(
                                           padding: EdgeInsets.zero,
                                           onPressed: () {
-                                            if (commentImage == null ) {
-                                                SocialCubit.get(context)
-                                                    .commentPost(
-                                                  postId: postId,
-                                                  comment: commentTextControl.text,
-                                                  date: getDate(),
-                                                  time: TimeOfDay.now().format(context),
-                                                );
-                                              } else {
-                                                SocialCubit.get(context)
-                                                    .uploadCommentPic(
-                                                  postId: postId,
-                                                  commentText: commentTextControl
-                                                      .text ==
-                                                      ''
-                                                      ? null
-                                                      : commentTextControl.text,
-                                                  date: getDate(),
-                                                  time: TimeOfDay.now().format(context),
-                                                );
-                                              }
+                                            if (commentImage == null) {
+                                              SocialCubit.get(context)
+                                                  .commentPost(
+                                                postId: postId,
+                                                comment:
+                                                    commentTextControl.text,
+                                                date: getDate(),
+                                                time: TimeOfDay.now()
+                                                    .format(context),
+                                              );
+                                            } else {
+                                              SocialCubit.get(context)
+                                                  .uploadCommentPic(
+                                                postId: postId,
+                                                commentText: commentTextControl
+                                                            .text ==
+                                                        ''
+                                                    ? null
+                                                    : commentTextControl.text,
+                                                date: getDate(),
+                                                time: TimeOfDay.now()
+                                                    .format(context),
+                                              );
+                                            }
 
-                                              commentTextControl.clear();
-                                            SocialCubit.get(context).popCommentImage();
-
-
-
-                                            },
+                                            commentTextControl.clear();
+                                            SocialCubit.get(context)
+                                                .popCommentImage();
+                                          },
                                           icon: Icon(
                                             Icons.send,
                                             color: Colors.blue,
@@ -248,7 +270,6 @@ class CommentsScreen extends StatelessWidget {
   Widget buildComment(
     CommentModel comment,
     context,
-
   ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -266,8 +287,10 @@ class CommentsScreen extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                comment.commentText != null && comment.commentImage != null ?
-                /// If its (Text & Image) Comment
+                comment.commentText != null && comment.commentImage != null
+                    ?
+
+                    /// If its (Text & Image) Comment
                     Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -283,17 +306,19 @@ class CommentsScreen extends StatelessWidget {
                                       topEnd: Radius.circular(10.0),
                                     )),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5,
-                                    horizontal: 10,),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 5,
+                                    horizontal: 10,
+                                  ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '${comment.name}',
-                                        style:
-                                            TextStyle(fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
                                       ),
-
                                       Text(
                                         '${comment.commentText}',
                                       ),
@@ -302,75 +327,80 @@ class CommentsScreen extends StatelessWidget {
                                 ),
                               )),
                           Container(
-                              width: intToDouble(comment.commentImage!['width']) <= 400
+                              width: intToDouble(
+                                          comment.commentImage!['width']) <=
+                                      400
                                   ? intToDouble(comment.commentImage!['width'])
                                   : 250,
                               clipBehavior: Clip.antiAliasWithSaveLayer,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10)),
                               child: Image(
-                                  image:
-                                      NetworkImage(comment.commentImage!['image']))),
+                                  image: NetworkImage(
+                                      comment.commentImage!['image']))),
                         ],
                       )
                     : comment.commentImage != null
                         ?
-                /// If its (Image) Comment
+
+                        /// If its (Image) Comment
                         Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text( '${comment.name}',
+                              Text('${comment.name}',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                   )),
                               Container(
                                   padding: EdgeInsets.all(8),
-                                  width: intToDouble(comment.commentImage!['width']) <=
+                                  width: intToDouble(
+                                              comment.commentImage!['width']) <=
                                           400
-                                      ? intToDouble(comment.commentImage!['width'])
+                                      ? intToDouble(
+                                          comment.commentImage!['width'])
                                       : 250,
-
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(15)),
                                   child: Image(
                                       image: NetworkImage(
                                           comment.commentImage!['image']))),
                             ],
-                          ):
-                comment.commentText != null ?
+                          )
+                        : comment.commentText != null
+                            ?
 
-                /// If its (Text) Comment
-                Container(
-                    decoration: BoxDecoration(
-                        color: Colors.grey[500],
-                        borderRadius: BorderRadiusDirectional.only(
-                          bottomEnd: Radius.circular(10.0),
-                          topStart: Radius.circular(10.0),
-                          topEnd: Radius.circular(10.0),
-                        )),
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${comment.name}',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-
-                        Text(
-                          '${comment.commentText}',
-                        ),
-                      ],
-                    )
-                ):
-                SizedBox(
-                  height: 0,
-                ),
+                            /// If its (Text) Comment
+                            Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.grey[500],
+                                    borderRadius: BorderRadiusDirectional.only(
+                                      bottomEnd: Radius.circular(10.0),
+                                      topStart: Radius.circular(10.0),
+                                      topEnd: Radius.circular(10.0),
+                                    )),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${comment.name}',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      '${comment.commentText}',
+                                    ),
+                                  ],
+                                ))
+                            : SizedBox(
+                                height: 0,
+                              ),
                 Padding(
                   padding: const EdgeInsetsDirectional.only(start: 8.0),
                   child: Text(
                     '${comment.date} at ${comment.time}',
-                    style: TextStyle(color: Colors.grey,fontSize: 10),
+                    style: TextStyle(color: Colors.grey, fontSize: 10),
                   ),
                 )
               ],

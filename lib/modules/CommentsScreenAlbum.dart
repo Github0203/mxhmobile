@@ -9,7 +9,7 @@ import '../models/social_model/social_user_model.dart';
 import '../shared/components/components.dart';
 import '../shared/components/constants.dart';
 import '../shared/styles/iconbroken.dart';
-import 'package:socialapp/modules/userLike/UserLike.dart';
+import 'package:socialapp/modules/userLike/UserLikeAlbum.dart';
 import 'package:flutter/cupertino.dart';
 
 class CommentsScreenAlbum extends StatelessWidget {
@@ -37,6 +37,8 @@ class CommentsScreenAlbum extends StatelessWidget {
               // PostModel? post = SocialCubit.get(context).singlePost;
               List<CommentModel> comments = SocialCubit.get(context).comments;
               SocialUserModel? user = SocialCubit.get(context).socialUserModel;
+              double setWidth = MediaQuery.of(context).size.width;
+              double setHeight = MediaQuery.of(context).size.height;
               return Scaffold(
                 appBar: AppBar(
                   automaticallyImplyLeading: true,
@@ -67,13 +69,34 @@ class CommentsScreenAlbum extends StatelessWidget {
                               ),
                               InkWell
                               (
-                                onTap: () {
-                                  
-                                           Navigator.push(
-    context, CupertinoPageRoute(
-      builder: (context) => UserLike(postId!)
-                                        ));
-                                  },
+                                onTap: () => showDialog(
+                                  context: context,
+                                  barrierColor:
+                                      Color.fromARGB(97, 184, 181, 181),
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("Liked post"),
+                                      titleTextStyle: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                          fontSize: 20),
+                                      // backgroundColor: Colors.greenAccent,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                      //  content: UserLike(postId!),
+                                      content: Container(
+                                         height: setHeight * 0.5,
+                                      width: setWidth * 0.7,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            UserLikeAlbum(postId!)
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },),
                                 child: Text(
                                   'tap to see who like your post',
                                 ),

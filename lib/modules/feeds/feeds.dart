@@ -3,6 +3,7 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socialapp/models/social_model/post_model_sub.dart';
+import 'package:socialapp/modules/new_post/edit_post.dart';
 
 import '../../../layout/socialapp/cubit/cubit.dart';
 import '../../../layout/socialapp/cubit/state.dart';
@@ -15,30 +16,66 @@ import '../CommentsScreen.dart';
 import '../new_post/new_post.dart';
 import 'package:multi_image_layout/multi_image_layout.dart';
 import 'dart:io';
-import 'package:socialapp/modules/addMedias/addMedias.dart';
+import 'package:socialapp/shared/loadingPage/SkeletonsComponent/list_view_cards.dart';
 import 'package:socialapp/layout/gallery/gallery_view.dart';
 import 'package:socialapp/modules/feeds/feedDetail.dart';
 import 'package:flutter/cupertino.dart';
-
+import 'dart:async';
+import 'package:readmore/readmore.dart';
+import 'package:expandable/expandable.dart';
  
 
-class Feeds extends StatelessWidget {
+class Feeds extends StatefulWidget {
 
-  var scaffoldKey = GlobalKey<ScaffoldState>();
   @override
+  State<Feeds> createState() => _FeedsState();
+}
+
+class _FeedsState extends State<Feeds> {
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+   bool _isLoading = true;
+   bool navigatorbutton = true;
+   ScrollController scrollController = ScrollController(
+  initialScrollOffset: 2, // or whatever offset you wish
+  keepScrollOffset: true,
+);
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  // 1. Using Timer
+    Timer(Duration(seconds: 5), () {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  }
   Widget build(BuildContext context) {
-    bool loadingne = false;
+    
     return Builder(
       builder: (context) {
-        SocialCubit.get(context).getPosts();
+        
         SocialCubit.get(context).getMyData();
-    
+         print('MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM');
+        print(SocialCubit.get(context).posts1.length.toString());
+        Future.delayed(Duration(seconds: 3), () {
+          
+          SocialCubit.get(context).getAllUsersFriend();
+          SocialCubit.get(context).getPosts();
+          if(SocialCubit.get(context).posts1.length == 0){
+            _isLoading = false;
+          }
+        });
+   
+
 
         return BlocConsumer<SocialCubit, SocialStates>(
           listener: (context, state) {
                 if (state is SocialCreatePostSuccessState){
     showToast(text: "Đã thêm bài viết thành công", state: ToastStates.SUCCESS);
-                loadingne = true;
+                // loadingne = true;
                 }
                 if (state is SocialCreatePostErrorState){
     showToast(text: "Thêm bài viết thất bại", state: ToastStates.ERROR);
@@ -49,125 +86,29 @@ class Feeds extends StatelessWidget {
             double setWidth = MediaQuery.of(context).size.width;
             double setheight = MediaQuery.of(context).size.height;
 
-            return ConditionalBuilder(
-              condition: 
-              SocialCubit.get(context).posts1.isNotEmpty &&
-                  SocialCubit.get(context).socialUserModel != null,
-              builder: (context) => 
-              userModel == null ?
-              Center(child: CircularProgressIndicator()) 
-              :
-              SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                child: Column(
-                  children: [
-                    Card(
-                      clipBehavior: Clip.antiAliasWithSaveLayer,
-                      elevation: 5,
-                      margin: EdgeInsets.all(8),
-                      child: Column(
-                        children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  navigateTo(context,SocialLayout(4));
-                                },
-                                child: CircleAvatar(
-                                    radius: 22,
-                                    backgroundImage:
-                                    NetworkImage('${userModel!.image}')),
-                              ),
-
-                              TextButton(
-                                onPressed: () {
-                                  navigateTo(context, NewPostScreen());
-                                },
-                                child: SizedBox(
-                                  width: 100,
-                                  child: Text("What is in your mind ...",
-                                    style: const TextStyle(color: Colors.grey),
-                                    textAlign: TextAlign.start,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          Row(
-                            children: [
-
-                              Expanded(
-                                child: TextButton(
-                                    onPressed: () {
-
-                                       navigateTo(context, NewPostScreen());
-
-                                    },
-                                    child: Row(
-                                      children: const [
-                                        Icon(IconBroken.Image),
-                                        SizedBox(width: 5,),
-                                        Text("image/video",
-                                            ),
-                                      ],
-                                    )),
-                              ),
-                             Spacer(),
-
-                              Expanded(
-                                child: TextButton(
-                                    onPressed: () {},
-                                    child: Row(
-                                      children: const [
-                                        Icon(
-                                          Icons.tag,
-                                          color: Colors.red,
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          "#TAGS",
-                                          style: TextStyle(color: Colors.grey),
-                                        ),
-                                      ],
-                                    )),
-                              ),
-
-
-
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) => buildPost(SocialCubit.get(context).posts1[index],userModel,context, index,scaffoldKey, SocialCubit.get(context).posts1[index].albumImages),
-                      separatorBuilder: (context, index) => SizedBox(
-                        height: 8,
-                      ),
-                      itemCount: (SocialCubit.get(context).posts1.length),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                ),
-              ),
-              
-              fallback: (context) => 
-              userModel == null ?
-              Center(child: CircularProgressIndicator()) 
-              :
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
+            return RefreshIndicator(
+              onRefresh: () async { setState(() {}); },
+              child: ConditionalBuilder(
+                condition: 
+                SocialCubit.get(context).posts1.isNotEmpty &&
+                    SocialCubit.get(context).socialUserModel != null,
+                builder: (context) => 
+                userModel == null ?
+                Center(child: SizedBox(
+                  width: setWidth-20,
+                  height: 1000,
+                  child: ListviewCardsExamplePage(count: 3),
+                )) 
+                :
+                SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      Card(
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                        elevation: 5,
+                        margin: EdgeInsets.all(8),
+                        child: Column(
                           children: [
                             const SizedBox(
                               height: 10,
@@ -183,13 +124,14 @@ class Feeds extends StatelessWidget {
                                       backgroundImage:
                                       NetworkImage('${userModel!.image}')),
                                 ),
-              
+            
                                 TextButton(
                                   onPressed: () {
+                                    SocialCubit.get(context).postImage = null;
                                     navigateTo(context, NewPostScreen());
                                   },
                                   child: SizedBox(
-                                    width: 100,
+                                    width: 200,
                                     child: Text("What is in your mind ...",
                                       style: const TextStyle(color: Colors.grey),
                                       textAlign: TextAlign.start,
@@ -198,15 +140,133 @@ class Feeds extends StatelessWidget {
                                 ),
                               ],
                             ),
-                           Center(
-                            child:textModel(
-                              fontSize: 20,
-                              text: 'Chưa có bài viết nào'
-                              )
-                            ),
-                          ]
+            
+                            Row(
+                              children: [
+            
+                                Expanded(
+                                  child: TextButton(
+                                      onPressed: () {
+            
+                                         navigateTo(context, NewPostScreen());
+            
+                                      },
+                                      child: Row(
+                                        children: const [
+                                          Icon(IconBroken.Image),
+                                          SizedBox(width: 5,),
+                                          Text("image/video",
+                                              ),
+                                        ],
+                                      )),
+                                ),
+                               Spacer(),
+            
+                                Expanded(
+                                  child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        children: const [
+                                          Icon(
+                                            Icons.tag,
+                                            color: Colors.red,
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            "#TAGS",
+                                            style: TextStyle(color: Colors.grey),
+                                          ),
+                                        ],
+                                      )),
+                                ),
+            
+            
+            
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) =>
+                         buildPost(SocialCubit.get(context).posts1[index],userModel,context, index,scaffoldKey, SocialCubit.get(context).posts1[index].albumImages),
+                        separatorBuilder: (context, index) => SizedBox(
+                          height: 8,
+                        ),
+                        itemCount: (SocialCubit.get(context).posts1.length),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                    ],
+                  ),
                 ),
-              )
+                
+                fallback: (context) => 
+                userModel == null ?
+                Center(child: SizedBox(
+                  width: setWidth-20,
+                  height: 1000,
+                  child: ListviewCardsExamplePage(count: 3),
+                ))
+                :
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      navigateTo(context,SocialLayout(4));
+                                    },
+                                    child: CircleAvatar(
+                                        radius: 22,
+                                        backgroundImage:
+                                        NetworkImage('${userModel!.image}')),
+                                  ),
+                
+                                  TextButton(
+                                    onPressed: () {
+                                      
+                                     
+                                      navigateTo(context, NewPostScreen());
+                                     
+                                    },
+                                    child: SizedBox(
+                                      width: 100,
+                                      child: Text("What is in your mind ...",
+                                        style: const TextStyle(color: Colors.grey),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                             SingleChildScrollView(
+                               child: Center(
+                                child:
+                                _isLoading == true ?
+                                SizedBox(
+                                  width: setWidth -20,
+                                  height: 500,
+                                  child: ListviewCardsExamplePage(count: 1))
+                                : 
+                                textModel(text: 'No have post yet')
+                                                         
+                                ),
+                             ),
+                            ]
+                  ),
+                )
+              ),
             );
           },
         );
@@ -261,20 +321,175 @@ class Feeds extends StatelessWidget {
                   PopupMenuButton(
                     itemBuilder: (context) => [
                       PopupMenuItem(
-                        
-
-                        child: TextButton(onPressed: () {  SocialCubit.get(context).deletePost(model.postId); },
+                        height : 0,
+                        child: 
+                         model.uId == SocialCubit.get(context).socialUserModel!.uId ? 
+                        TextButton(
+                          onPressed: () {  
+                            showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+    title: Text('Delete'),
+    titlePadding: EdgeInsetsDirectional.only(start:13,top: 15 ),
+    content: Text('Are you sure?'),
+    elevation: 8,
+    contentPadding: EdgeInsets.all(15),
+    actions: [
+      OutlinedButton(
+          onPressed: (){
+               SocialCubit.get(context).deletePost(model.postId); 
+               Navigator.pop(context);
+               Navigator.pop(context);
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const <Widget>[
+              Icon(Icons.done_all_outlined),
+              SizedBox(width:10),
+              Text('Yes'),
+            ],
+          ),
+      ),
+       ElevatedButton(
+          style:ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blueAccent)) ,
+          onPressed: (){
+            Navigator.pop(context);
+          },
+          child:Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+           Text('Cancel',style: TextStyle(color: Colors.white))
+            ],
+          ),
+        ),
+    ]
+                        );
+                      });
+    
+                         },
                           child: Text('Delete post'),
+                      )
+                          : Container()
                       ),
-                      ),
+                      
                       PopupMenuItem(
-
-                        child: TextButton(onPressed: () { 
-                          SocialCubit.get(context).getPosts;
+                          height : 0,
+                        child: 
+                         model.uId == SocialCubit.get(context).socialUserModel!.uId ? 
+                        
+                        TextButton(onPressed: () { 
+                          setState(() {
+      navigatorbutton = true;
+    }); 
+                          SocialCubit.get(context).listDeleteTemp!.clear();
+                          SocialCubit.get(context).getDetailSubPost(model.postId!);
+  
+ // ); 
+ 
+  showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        navigatorbutton == true ?
+                                    Future.delayed(Duration(seconds: 5), () {
+                                      SocialCubit.get(context).getTagsPosttoEdit(model.postId!);
+                            Navigator.pop(context);
+                            SocialCubit.get(context).geteditDetailPost(model.postId!);
+             navigateTo(context, EditPostScreen(postId: model.postId));
+                                    }) : '';
+        return WillPopScope(
+            onWillPop: () {
+    setState(() {
+      navigatorbutton = false;
+    });
+    Navigator.pop(context);
+    return Future(() => false);
+  },
+            child:AlertDialog(
+            // title: new Text("Alert Title"),
+            content:   Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const <Widget>[
+              CircularProgressIndicator(),
+              SizedBox(height: 10,),
+              Text("Loading"),
+            ],
+          ),
+           
+          )
+        );
+      },
+    );
+   
+    // navigatorbutton == true ?
+    //                       Future.delayed(Duration(seconds: 5), () {
+    //                         Navigator.pop(context);
+    //                         SocialCubit.get(context).geteditDetailPost(model.postId!);
+    //          navigateTo(context, EditPostScreen(postId: model.postId));
+    //     })
+    //     :
+    //     Navigator.pop(context);
+                       
                          },
                           child: Text('Edit post'),
+                      )
+                      :
+                      Container()
                       ),
-                      ),
+                      
+                      PopupMenuItem(
+                        height : 0,
+                        child: 
+                         model.uId != SocialCubit.get(context).socialUserModel!.uId ?
+                      TextButton(
+                        onPressed: () {  
+                            showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+    title: Text('Unfollow'),
+    titlePadding: EdgeInsetsDirectional.only(start:13,top: 15 ),
+    content: Text('Are you sure?'),
+    elevation: 8,
+    contentPadding: EdgeInsets.all(15),
+    actions: [
+      OutlinedButton(
+          onPressed: (){
+                SocialCubit.get(context).unFollowingFromPost(SocialCubit.get(context).socialUserModel!.uId, '${model.uId}' );
+               Navigator.pop(context);
+               Navigator.pop(context);
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const <Widget>[
+              Icon(Icons.done_all_outlined),
+              SizedBox(width:10),
+              Text('Yes'),
+            ],
+          ),
+      ),
+       ElevatedButton(
+          style:ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blueAccent)) ,
+          onPressed: (){
+            Navigator.pop(context);
+          },
+          child:Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+           Text('Cancel',style: TextStyle(color: Colors.white))
+            ],
+          ),
+        ),
+    ]
+                        );
+                      });
+                        SocialCubit.get(context).unFollowingFromPost(SocialCubit.get(context).socialUserModel!.uId, '${model.uId}' );
+                      }, child: Text('Unfollow'))
+                        :
+                      Container()
+                      )
+                    
                     ],
                     child: Row(
                       children: const [
@@ -286,17 +501,20 @@ class Feeds extends StatelessWidget {
                       ],
                     ),
                   ),
+                
                 ],
               ),
               myDivider(),
-              model.text != null
-                  ? Text(
-                      '${model.text}',
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    )
-                  : Text('${model.text}', style: TextStyle(fontSize: 20)),
+              model.text != null ?
+                            ReadMoreText(
+                  '${model.text}',
+                  trimLines: 2,
+                  colorClickableText: Colors.pink,
+                  trimMode: TrimMode.Line,
+                  trimCollapsedText: '...Show more',
+                  trimExpandedText: ' show less',
+                ) : Text(''),
+              
               // if (model.subPost.postImage.toString() != null)
                 // Padding(
                 //     padding: const EdgeInsetsDirectional.only(top: 10),
@@ -331,7 +549,9 @@ class Feeds extends StatelessWidget {
               List<String> urls = [];
               
               documents.forEach((doc) {
+                if(doc['display'] == 'yes'){
                     urls.add(doc['postImage'].toString(),);
+                }
               });
 
               print(urls.length.toString());
@@ -342,14 +562,17 @@ class Feeds extends StatelessWidget {
                 Container(
                    width: MediaQuery.of(context).size.width - 26,
               height: urls.length == 1 ?
-                      300 : 
+                      250 : 
                       urls.length == 2 ?
-                      210 :
+                      130 :
                       urls.length == 3 ?
                       140 : 
                       urls.length >= 4 ?
                       400 : 0,
-
+              color: Color.fromARGB(0, 212, 212, 212),
+              constraints: BoxConstraints(
+    maxHeight: double.infinity,
+),
                   child: 
                   PhotoGrid(
                             imageUrls: urls,
@@ -374,23 +597,108 @@ class Feeds extends StatelessWidget {
                 ),
               Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 6.0),
-                    child: SizedBox(
-                      height: 20,
-                      child: MaterialButton(
-                        onPressed: () {},
-                        minWidth: 1.0,
-                        padding: EdgeInsets.zero,
-                        child: Text(
-                          "#Software",
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                      ),
+                  Expanded(
+                    // height: 30,
+                    child: Column(
+                      children: [
+                        ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          // scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                                          itemCount: SocialCubit.get(context).posts1[index].tags!.length.clamp(0, 2),
+                                          itemBuilder: (context, indextag) {
+                                            return  Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 3.0),
+                          child: SizedBox(
+                            height: SocialCubit.get(context).posts1[index].tags!.length < 3 ?
+                            26
+                            : SocialCubit.get(context).posts1[index].tags!.length  == 3 ? 30 :
+                            SocialCubit.get(context).posts1[index].tags!.length > 3 ?
+                             SocialCubit.get(context).posts1[index].tags!.length * 4.5 : 0,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start  ,
+                              children: [
+                                Text(
+                                  "# " + SocialCubit.get(context).posts1[index].tags![indextag],
+                                  style: TextStyle(color: Colors.blue),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                                          },
+                                        ),
+SocialCubit.get(context).posts1[index].tags!.length >= 3 ?     
+     ExpandableNotifier(  // <-- Provides ExpandableController to its children
+      child: Column(
+        children: [
+          Expandable(           // <-- Driven by ExpandableController from ExpandableNotifier
+            collapsed: ExpandableButton(  // <-- Expands when tapped on the cover photo
+              child: Text('More...', style: TextStyle( 
+      fontSize: 18,
+      height: 2, //line height 200%, 1= 100%, were 0.9 = 90% of actual line height
+      fontWeight: FontWeight.w300
+  ),
+  ),
+            ),
+            expanded: Column(  
+              children: [
+                
+                ListView.builder(
+                  controller: scrollController,
+                          physics: NeverScrollableScrollPhysics(),
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                                          itemCount: SocialCubit.get(context).posts1[index].tags!.length -2,
+                                          itemBuilder: (context, indextag1) {
+                                            return  Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 3.0),
+                          child: SizedBox(
+                            height: SocialCubit.get(context).posts1[index].tags!.length < 3 ?
+                            26
+                            : SocialCubit.get(context).posts1[index].tags!.length  == 3 ? 30 :
+                            SocialCubit.get(context).posts1[index].tags!.length > 3 ?
+                             SocialCubit.get(context).posts1[index].tags!.length * 4.5 : 0,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start  ,
+                              children: [
+                                Text(
+                                  "# " + SocialCubit.get(context).posts1[index].tags!.sublist(2,SocialCubit.get(context).posts1[index].tags!.length)[indextag1],
+                                  style: TextStyle(color: Colors.blue),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                                          },
+                                        ),
+                ExpandableButton(       // <-- Collapses when tapped on
+                  child: Text("Hide",textAlign: TextAlign.left, style: TextStyle( 
+      fontSize: 18,
+      height: 2, //line height 200%, 1= 100%, were 0.9 = 90% of actual line height
+      fontWeight: FontWeight.w300
+  ),),
+                ),
+              ]
+            ),
+          ),
+        ],
+      ),
+    )
+    :
+    Container(),
+                             
+                                        
+                      ],
                     ),
                   ),
                 ],
               ),
+             
               SizedBox(
                 height: 10,
               ),
@@ -404,7 +712,7 @@ class Feeds extends StatelessWidget {
                           
                           postUser: postUser,
                           context: context,
-                          // postModel: model,
+                          postModel: model,
                           postId: model.postId,
                                                );
                     },
@@ -559,6 +867,5 @@ class Feeds extends StatelessWidget {
           ),
         ),
       );
-
 }
 

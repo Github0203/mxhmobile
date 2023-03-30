@@ -31,13 +31,16 @@ class _PhotoGridState extends State<PhotoGrid> {
  
     // print(widget.imageUrls.);
     return 
-     GridView.count(
-      childAspectRatio: 1,          
-      crossAxisCount: widget.imageUrls!.length == 1 ? 1 : widget.imageUrls!.length == 2 ? 2 : widget.imageUrls!.length == 3 ? 3 : 2,
-      crossAxisSpacing: 5.0,
-      mainAxisSpacing: 5.0,
-      children: images,
-    );
+     AspectRatio(
+       aspectRatio: 1.0,
+       child: GridView.count(
+        childAspectRatio: 4 / 3,          
+        crossAxisCount: widget.imageUrls!.length == 1 ? 1 : widget.imageUrls!.length == 2 ? 2 : widget.imageUrls!.length == 3 ? 3 : 2,
+        crossAxisSpacing: 5.0,
+        mainAxisSpacing: 5.0,
+        children: images,
+         ),
+     );
     // GridView(
     //   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
     //     maxCrossAxisExtent: 200,

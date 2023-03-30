@@ -9,6 +9,7 @@ import '../models/social_model/social_user_model.dart';
 import '../shared/components/components.dart';
 import '../shared/components/constants.dart';
 import '../shared/styles/iconbroken.dart';
+import 'package:socialapp/modules/userLike/UserLikeSub.dart';
 
 class CommentsScreenSub extends StatelessWidget {
   var commentTextControl = TextEditingController();
@@ -37,6 +38,8 @@ class CommentsScreenSub extends StatelessWidget {
               // PostModel? post = SocialCubit.get(context).singlePost;
               List<CommentModel> comments = SocialCubit.get(context).comments;
               SocialUserModel? user = SocialCubit.get(context).socialUserModel;
+              double setWidth = MediaQuery.of(context).size.width;
+              double setHeight = MediaQuery.of(context).size.height;
               return Scaffold(
                 appBar: AppBar(
                   automaticallyImplyLeading: true,
@@ -57,7 +60,7 @@ class CommentsScreenSub extends StatelessWidget {
                             // navigateTo(context, WhoLikedScreen(postId));
                           },
                           child: Row(
-                            children: const [
+                            children: [
                               Icon(
                                 IconBroken.Heart,
                                 color: Colors.red,
@@ -65,8 +68,39 @@ class CommentsScreenSub extends StatelessWidget {
                               SizedBox(
                                 width: 5,
                               ),
-                              Text(
-                                'tap to see who like your post',
+                              InkWell
+                              (
+                                onTap: () => showDialog(
+                                  context: context,
+                                  barrierColor:
+                                      Color.fromARGB(97, 184, 181, 181),
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("Liked post"),
+                                      titleTextStyle: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                          fontSize: 20),
+                                      // backgroundColor: Colors.greenAccent,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                      //  content: UserLike(postId!),
+                                      content: Container(
+                                         height: setHeight * 0.5,
+                                      width: setWidth * 0.7,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            UserLikeSub(postId!, postIdSub)
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },),
+                                child: Text(
+                                  'tap to see who like your post',
+                                ),
                               ),
 
                             ],
@@ -77,7 +111,7 @@ class CommentsScreenSub extends StatelessWidget {
                         ),
                         comments.isNotEmpty
                             ? Expanded(
-                                child: ListView.separated(
+                                child: ListView.separated(  
                                   itemBuilder: (context, index) => buildComment(
                                     comments[index],
                                     context,

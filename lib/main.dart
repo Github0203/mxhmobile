@@ -25,7 +25,6 @@ import 'shared/network/remote/dio_helper.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'firebase_options.dart';
 import 'package:http/http.dart' as http;
-import 'NotificationScreen.dart';
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 print('Handling a background message ${message.messageId}');
@@ -264,7 +263,7 @@ android: androidPlatformChannelSpecifics,
     // When navigating to the "/" route, build the FirstScreen widget.
     // '/': (context) => const SocialLoginScreen(),
     // When navigating to the "/second" route, build the SecondScreen widget.
-    '/friendpage': (context) => ProfileScreenFriend(getuserModelFriend: null, userId: UidFriend),
+    '/friendpage': (context) => ProfileScreenFriend( userId: UidFriend),
   },
               );
             },
