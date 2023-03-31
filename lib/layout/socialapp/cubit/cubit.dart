@@ -1298,7 +1298,7 @@ if(editsubpostTemp != null){
         .collection('posts').doc(idPost).collection('posts').doc(idPostSub)
         .snapshots()
         .listen((event) async {
-      getdetailpostview=null;
+      getdetailpostview = null;
       getdetailpostview = (PostModelSub.fromJson(event.data()));
       
       emit(SocialGetSubPostSuccessState());
@@ -1308,6 +1308,8 @@ if(editsubpostTemp != null){
   }
     PostModelSub? getdetailpostviewImage;
   void viewDetailPostAlbum(String idPost, String idPostSub) {
+    print('idPost la :       ' + idPost.toString());
+    print('idPostSub la :       ' + idPostSub.toString());
       FirebaseFirestore.instance
         .collection('albumImages').doc(idPost).collection('albumImages').doc(idPostSub)
         .snapshots()
@@ -1504,7 +1506,7 @@ List<LikesModel>? getpostsUserLike=[];
       showToast(text: "Post Deleted", state: ToastStates.ERROR);
       emit(DeletePostSuccessState());
     });
-    getPosts();
+    getPostsAlbum();
   }
   void removePostImage() {
     postImage = null;
@@ -1908,7 +1910,7 @@ final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   
 
   List<PostModelSub>? editsubpostTempWhenCreatePost_picker;
-  List<PostModelSub>? editsubpostTempWhenCreatePost;
+  List<PostModelSub>? editsubpostTempWhenCreatePost = [];
   Future<void> pickFiles() async {
     // resetState();
       final result = await FilePicker.platform.pickFiles(allowMultiple: true);

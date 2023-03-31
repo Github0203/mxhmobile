@@ -38,7 +38,7 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
           title: 'Chi tiết',
           actions: []),
       body: Builder(builder: (context) {
-        SocialCubit.get(context).viewDetailPostAlbum(idPost!, idPostSub!);
+        // SocialCubit.get(context).viewDetailPostAlbum(idPost!, idPostSub!);
 
         return BlocConsumer<SocialCubit, SocialStates>(
           listener: (context, state) {},
@@ -47,9 +47,12 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
                 SocialCubit.get(context).socialUserModel;
             double setWidth = MediaQuery.of(context).size.width;
             double setheight = MediaQuery.of(context).size.height;
-
+            print('99999999999999999999999999999999999999999999');
+            print('getdetailpostviewImage         ' + SocialCubit.get(context).getdetailpostviewImage!.uId.toString());
+            print('userModel         ' + userModel!.uId.toString());
             return ConditionalBuilder(
               condition: 
+              SocialCubit.get(context).getdetailpostviewImage != null &&
                   userModel != null,
               builder: (context) => 
               SingleChildScrollView(
@@ -59,14 +62,18 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                    SizedBox(height: 10,),
+                   SocialCubit.get(context).getdetailpostviewImage!.text!.isNotEmpty ?
                    Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Text(
-                      SocialCubit.get(context).getdetailpostview!.text.toString(),
+                      SocialCubit.get(context).getdetailpostviewImage!.text.toString(),
                          textAlign: TextAlign.left
                                   ),
-                    ),
+                    )
+                    :
+                    Container(),
                     SizedBox(height: 10,),
+                    SocialCubit.get(context).getdetailpostviewImage!.tags!.isNotEmpty ?
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
@@ -79,22 +86,22 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
                             physics: NeverScrollableScrollPhysics(),
                             // scrollDirection: Axis.vertical,
                             shrinkWrap: true,
-                                            itemCount: SocialCubit.get(context).getdetailpostview!.tags!.length.clamp(0, 2),
+                                            itemCount: SocialCubit.get(context).getdetailpostviewImage!.tags!.length.clamp(0, 2),
                                             itemBuilder: (context, indextag) {
                                               return  Padding(
                             padding: const EdgeInsetsDirectional.only(end: 3.0),
                             child: SizedBox(
-                              height: SocialCubit.get(context).getdetailpostview!.tags!.length < 3 ?
+                              height: SocialCubit.get(context).getdetailpostviewImage!.tags!.length < 3 ?
                               26
-                              : SocialCubit.get(context).getdetailpostview!.tags!.length  == 3 ? 30 :
-                              SocialCubit.get(context).getdetailpostview!.tags!.length > 3 ?
-                               SocialCubit.get(context).getdetailpostview!.tags!.length * 4.5 : 0,
+                              : SocialCubit.get(context).getdetailpostviewImage!.tags!.length  == 3 ? 30 :
+                              SocialCubit.get(context).getdetailpostviewImage!.tags!.length > 3 ?
+                               SocialCubit.get(context).getdetailpostviewImage!.tags!.length * 4.5 : 0,
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start  ,
                                 children: [
                                   Text(
-                                    "# " + SocialCubit.get(context).getdetailpostview!.tags![indextag],
+                                    "# " + SocialCubit.get(context).getdetailpostviewImage!.tags![indextag],
                                     style: TextStyle(color: Colors.blue),
                                     textAlign: TextAlign.left,
                                   ),
@@ -104,7 +111,7 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
                           );
                                             },
                                           ),
-                    SocialCubit.get(context).getdetailpostview!.tags!.length >= 3 ?     
+                    SocialCubit.get(context).getdetailpostviewImage!.tags!.length >= 3 ?     
                          ExpandableNotifier(  // <-- Provides ExpandableController to its children
                           child: Column(
                             children: [
@@ -124,22 +131,22 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
                             physics: NeverScrollableScrollPhysics(),
                             scrollDirection: Axis.vertical,
                             shrinkWrap: true,
-                                            itemCount: SocialCubit.get(context).getdetailpostview!.tags!.length -2,
+                                            itemCount: SocialCubit.get(context).getdetailpostviewImage!.tags!.length -2,
                                             itemBuilder: (context, indextag1) {
                                               return  Padding(
                             padding: const EdgeInsetsDirectional.only(end: 3.0),
                             child: SizedBox(
-                              height: SocialCubit.get(context).getdetailpostview!.tags!.length < 3 ?
+                              height: SocialCubit.get(context).getdetailpostviewImage!.tags!.length < 3 ?
                               26
-                              : SocialCubit.get(context).getdetailpostview!.tags!.length  == 3 ? 30 :
-                              SocialCubit.get(context).getdetailpostview!.tags!.length > 3 ?
-                               SocialCubit.get(context).getdetailpostview!.tags!.length * 4.5 : 0,
+                              : SocialCubit.get(context).getdetailpostviewImage!.tags!.length  == 3 ? 30 :
+                              SocialCubit.get(context).getdetailpostviewImage!.tags!.length > 3 ?
+                               SocialCubit.get(context).getdetailpostviewImage!.tags!.length * 4.5 : 0,
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start  ,
                                 children: [
                                   Text(
-                                    "# " + SocialCubit.get(context).getdetailpostview!.tags!.sublist(2,SocialCubit.get(context).getdetailpostview!.tags!.length)[indextag1],
+                                    "# " + SocialCubit.get(context).getdetailpostviewImage!.tags!.sublist(2,SocialCubit.get(context).getdetailpostviewImage!.tags!.length)[indextag1],
                                     style: TextStyle(color: Colors.blue),
                                     textAlign: TextAlign.left,
                                   ),
@@ -171,8 +178,8 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
                                       ),
                                     ],
                                   ),
-                    ),
-             
+                    )
+                    :Container(),
              SizedBox(height: 10,),
                   
                   Card(
@@ -187,8 +194,8 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
                           SizedBox(
                             height: 10,
                           ),
-                          
-                          UrlTypeHelper.getType(SocialCubit.get(context).getdetailpostviewImage!.postImage.toString()) == UrlType.IMAGE ?
+                          Center(
+                            child:   UrlTypeHelper.getType(SocialCubit.get(context).getdetailpostviewImage!.postImage.toString()) == UrlType.IMAGE ?
                           Image.network(
                             SocialCubit.get(context).getdetailpostviewImage!.postImage.toString(),
                             fit: BoxFit.fill,
@@ -218,7 +225,8 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
                           )
                           :
                           Container(),
-
+                          ),
+                        
 
 
                           SizedBox(
@@ -460,7 +468,8 @@ viewDetailPostAlbum( this.idPost,this.idPostSub);
                       PopupMenuItem(
                         child: TextButton(
                           onPressed: () {
-                            SocialCubit.get(context).deletePost(model.postId);
+                            SocialCubit.get(context).deletePostAlbum(model.postId);
+                            Navigator.pop(context);
                           },
                           child: Text('Delete post'),
                         ),

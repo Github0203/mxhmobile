@@ -61,14 +61,18 @@ viewDetailPost( this.idPost,this.idPostSub);
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 10,),
+                    SocialCubit.get(context).getdetailpostview!.text!.isNotEmpty ?
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Text(
                       SocialCubit.get(context).getdetailpostview!.text.toString(),
                          textAlign: TextAlign.left
                                   ),
-                    ),
+                    )
+                    :
+                    Container(),
                     SizedBox(height: 10,),
+                    SocialCubit.get(context).getdetailpostview!.tags!.isNotEmpty ?
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Row(
@@ -173,8 +177,9 @@ viewDetailPost( this.idPost,this.idPostSub);
                                       ),
                                     ],
                                   ),
-                    ),
-             
+                    )
+                    :
+                    Container(),
              SizedBox(height: 10,),
                   
                   Card(
@@ -189,8 +194,9 @@ viewDetailPost( this.idPost,this.idPostSub);
                           SizedBox(
                             height: 10,
                           ),
-                           UrlTypeHelper.getType(SocialCubit.get(context).getdetailpostview!.postImage.toString()) == UrlType.IMAGE ?
-                          Image.network(
+                          Center(
+                            child: UrlTypeHelper.getType(SocialCubit.get(context).getdetailpostview!.postImage.toString()) == UrlType.IMAGE ?
+                          Image.network( 
                             SocialCubit.get(context).getdetailpostview!.postImage.toString(),
                             fit: BoxFit.fill,
                             loadingBuilder: (BuildContext context,
@@ -219,6 +225,8 @@ viewDetailPost( this.idPost,this.idPostSub);
                           )
                           :
                           Container(),
+                          ),
+                           
                           SizedBox(
                             height: 10,
                           ),

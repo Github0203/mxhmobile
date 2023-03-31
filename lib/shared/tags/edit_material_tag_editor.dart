@@ -59,7 +59,7 @@ class _Edit_Material_tag_editorState extends State<Edit_Material_tag_editor> {
                   length: SocialCubit.get(context).valueTags.length,
                   controller: _textEditingController,
                   focusNode: _focusNode,
-                  delimiters: ['a', 'a', 'a'],
+                  delimiters: [',', ' '],
                   hasAddButton: true,
                   resetTextOnSubmitted: true,
                   // This is set to grey just to illustrate the `textStyle` prop

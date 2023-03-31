@@ -113,32 +113,35 @@ class _FeedsState extends State<Feeds> {
                             const SizedBox(
                               height: 10,
                             ),
-                            Row(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    navigateTo(context,SocialLayout(4));
-                                  },
-                                  child: CircleAvatar(
-                                      radius: 22,
-                                      backgroundImage:
-                                      NetworkImage('${userModel!.image}')),
-                                ),
-            
-                                TextButton(
-                                  onPressed: () {
-                                    SocialCubit.get(context).postImage = null;
-                                    navigateTo(context, NewPostScreen());
-                                  },
-                                  child: SizedBox(
-                                    width: 200,
-                                    child: Text("What is in your mind ...",
-                                      style: const TextStyle(color: Colors.grey),
-                                      textAlign: TextAlign.start,
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      navigateTo(context,SocialLayout(4));
+                                    },
+                                    child: CircleAvatar(
+                                        radius: 22,
+                                        backgroundImage:
+                                        NetworkImage('${userModel!.image}')),
+                                  ),
+                                        
+                                  TextButton(
+                                    onPressed: () {
+                                      SocialCubit.get(context).postImage = null;
+                                      navigateTo(context, NewPostScreen());
+                                    },
+                                    child: SizedBox(
+                                      width: 200,
+                                      child: Text("What is in your mind ...",
+                                        style: const TextStyle(color: Colors.grey),
+                                        textAlign: TextAlign.start,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
             
                             Row(
@@ -216,54 +219,59 @@ class _FeedsState extends State<Feeds> {
                 :
                 Padding(
                   padding: const EdgeInsets.all(8),
-                  child: Column(
-                            children: [
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      navigateTo(context,SocialLayout(4));
-                                    },
-                                    child: CircleAvatar(
-                                        radius: 22,
-                                        backgroundImage:
-                                        NetworkImage('${userModel!.image}')),
-                                  ),
-                
-                                  TextButton(
-                                    onPressed: () {
-                                      
-                                     
-                                      navigateTo(context, NewPostScreen());
-                                     
-                                    },
-                                    child: SizedBox(
-                                      width: 100,
-                                      child: Text("What is in your mind ...",
-                                        style: const TextStyle(color: Colors.grey),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                             SingleChildScrollView(
-                               child: Center(
-                                child:
-                                _isLoading == true ?
-                                SizedBox(
-                                  width: setWidth -20,
-                                  height: 500,
-                                  child: ListviewCardsExamplePage(count: 1))
-                                : 
-                                textModel(text: 'No have post yet')
-                                                         
+                  child: SingleChildScrollView(
+                    child: Column(
+                              children: [
+                                const SizedBox(
+                                  height: 10,
                                 ),
-                             ),
-                            ]
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          navigateTo(context,SocialLayout(4));
+                                        },
+                                        child: CircleAvatar(
+                                            radius: 22,
+                                            backgroundImage:
+                                            NetworkImage('${userModel!.image}')),
+                                      ),
+                                    
+                                      TextButton(
+                                        onPressed: () {
+                                          
+                                         
+                                          navigateTo(context, NewPostScreen());
+                                         
+                                        },
+                                        child: SizedBox(
+                                          width: 100,
+                                          child: Text("What is in your mind ...",
+                                            style: const TextStyle(color: Colors.grey),
+                                            textAlign: TextAlign.start,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                               SingleChildScrollView(
+                                 child: Center(
+                                  child:
+                                  _isLoading == true ?
+                                  SizedBox(
+                                    width: setWidth -20,
+                                    height: 500,
+                                    child: ListviewCardsExamplePage(count: 1))
+                                  : 
+                                  textModel(text: 'No have post yet')
+                                                           
+                                  ),
+                               ),
+                              ]
+                    ),
                   ),
                 )
               ),

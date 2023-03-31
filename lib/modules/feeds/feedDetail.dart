@@ -23,6 +23,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:readmore/readmore.dart';
 import 'package:expandable/expandable.dart';
 import 'package:socialapp/modules/new_post/edit_post.dart';
+import 'package:socialapp/shared/network/UrlTypeHelper';
+import 'package:socialapp/layout/video/video_player.dart';
 
 // ignore: must_be_immutable
 class feedDetail extends StatefulWidget {
@@ -228,9 +230,9 @@ SocialCubit.get(context).posts2[index1].tags!.length >= 3 ?
                   ),
                 ],
               ),
-             
-
-                                Image.network(SocialCubit.get(context).posts2[index1].postImage.toString(),
+             Center(
+              child: UrlTypeHelper.getType(SocialCubit.get(context).posts2[index1].postImage.toString()) == UrlType.IMAGE ?
+             Image.network(SocialCubit.get(context).posts2[index1].postImage.toString(),
                                   fit: BoxFit.fill,
                                   loadingBuilder: (BuildContext context,
                                       Widget child,
@@ -247,7 +249,15 @@ SocialCubit.get(context).posts2[index1].tags!.length >= 3 ?
                                       ),
                                     );
                                   },
-                                ),
+                                )
+              :
+              UrlTypeHelper.getType(SocialCubit.get(context).posts2[index1].postImage.toString()) == UrlType.VIDEO ?
+              VideoThumbnail(SocialCubit.get(context).posts2[index1].postImage.toString())
+              :
+              Container(),
+             ),
+ 
+                                
                                 SizedBox(
                                   height: 10,
                                 ),

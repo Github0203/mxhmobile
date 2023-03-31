@@ -112,7 +112,11 @@ class _Photos_Detail_PageState extends State<Photos_Detail_Page> {
                               UrlTypeHelper.getType(getImageuRi.postImage.toString()) == UrlType.IMAGE ?
                                     GestureDetector (
                                       onTap: () =>  {
-                                        navigateTo(context, viewDetailPostAlbum( widget.idAlbum.toString(), getImageuRi.postIdSub.toString())),
+                                         SocialCubit.get(context).viewDetailPostAlbum(widget.idAlbum.toString(), getImageuRi.postIdSub.toString()),
+                                        Future.delayed(Duration(seconds: 1), () {                                          
+        navigateTo(context, viewDetailPostAlbum( widget.idAlbum.toString(), getImageuRi.postIdSub.toString()));
+    // countnotification = cubit.listNotificationDisplayyes! + 1;
+         }),
                                       },
                                       child: Column(
                                         children: [
@@ -132,9 +136,16 @@ class _Photos_Detail_PageState extends State<Photos_Detail_Page> {
                                     :
                                     UrlTypeHelper.getType(getImageuRi.postImage.toString()) == UrlType.VIDEO ?
                                     GestureDetector (
-                                      onTap: () =>  {
-                                        navigateTo(context, viewDetailPostAlbum( widget.idAlbum.toString(), getImageuRi.postIdSub.toString())),
-                                      },
+                                       onTap: () =>  {
+                                         SocialCubit.get(context).viewDetailPostAlbum(widget.idAlbum.toString(), getImageuRi.postIdSub.toString()),
+                                        Future.delayed(Duration(seconds: 1), () {                                          
+        navigateTo(context, viewDetailPostAlbum( widget.idAlbum.toString(), getImageuRi.postIdSub.toString()));
+    // countnotification = cubit.listNotificationDisplayyes! + 1;
+         }),
+                                       },
+                                      // onTap: () =>  {
+                                      //   navigateTo(context, viewDetailPostAlbum( widget.idAlbum.toString(), getImageuRi.postIdSub.toString())),
+                                      // },
                                       child: Column(
                                         children: [
                                           AbsorbPointer(

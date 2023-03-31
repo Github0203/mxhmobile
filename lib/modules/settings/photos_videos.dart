@@ -33,6 +33,8 @@ class Photos_videos extends StatelessWidget {
   Widget build(BuildContext context) {
     bool loadingne = false;
      var scaffoldKey = GlobalKey<ScaffoldState>();
+     double setWidth = MediaQuery.of(context).size.width;
+        double setheight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: defaultAppBarNoPop(
           context: context,
@@ -67,14 +69,40 @@ class Photos_videos extends StatelessWidget {
                   ),
                  fallback: (context) => 
                  Container(
-                  child: Center(child: textModel(text: 'Chưa có Album nào')),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Center(child: textModel(text: 'Chưa có Album nào')),
+                      SizedBox(height: 10),
+                      Container(
+                        width: setWidth*0.3,
+                        child: OutlinedButton(
+                                    child:Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: const <Widget>[
+                                        Icon(IconBroken.Image, color: Colors.blueAccent,),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                         Text('Add Photos',style: TextStyle(color: Colors.blue),),
+                                      ],
+                                    ) , onPressed: (){
+                                    SocialCubit.get(context).paths = null;
+                                    SocialCubit.get(context).editsubpostTempWhenCreatePost = null;
+                                      navigateTo(context, NewPostPersonalScreen());
+                                    },
+                                    style:OutlinedButton.styleFrom(primary: Colors.grey)
+                                  ),
+                      ),                      // TextButton.icon(onPressed: onPressed, icon: (icon), label: label)
+                    ],
+                  ),
                  )
                 );
               }
     
     
-          );
-        }
+          );        }
       ),
     );
   }

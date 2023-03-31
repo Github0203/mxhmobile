@@ -45,7 +45,7 @@ class NewPostScreen extends StatelessWidget {
         if (state is SocialCreatePostSuccessState) {
           navigateTo(context, SocialLayout(0));
           SocialCubit.get(context).currentIndex = 0;
-          SocialCubit.get(context).postImage = null;
+          // SocialCubit.get(context).postImage = null;
           SocialCubit.get(context).editsubpostTempWhenCreatePost = [];
           SocialCubit.get(context).editsubpostDetailwhenCreate = null;
           
@@ -55,6 +55,7 @@ class NewPostScreen extends StatelessWidget {
         var socialUserModel = SocialCubit.get(context).socialUserModel;
         double setWidth = MediaQuery.of(context).size.width;
         double setheight = MediaQuery.of(context).size.height;
+        SocialCubit.get(context).editsubpostTempWhenCreatePost ??= [];
 
         return GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),

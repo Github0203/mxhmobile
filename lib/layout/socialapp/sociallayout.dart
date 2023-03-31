@@ -42,6 +42,7 @@ class SocialLayout extends StatelessWidget {
     // countnotification = cubit.listNotificationDisplayyes! + 1;
          });
          return  Scaffold(
+          resizeToAvoidBottomInset : false,
            appBar: AppBar(
              title:   Text(cubit.titles[initialIndex],),
              actions: [

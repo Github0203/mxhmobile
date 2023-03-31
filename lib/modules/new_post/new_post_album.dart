@@ -414,7 +414,7 @@ class NewPostPersonalScreen extends StatelessWidget {
                        
                    
                       SizedBox(
-                        height: 20,
+                        height: 0,
                       ),
                      
                       Expanded(

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:bot_toast/bot_toast.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:socialapp/modules/settings/Profile_screen_friend.dart';
-import 'package:socialapp/shared/components/components.dart';
 import 'package:socialapp/shared/cubit/cubit.dart';
 import 'package:socialapp/shared/cubit/states.dart';
 import 'package:socialapp/shared/styles/themes.dart';
